@@ -1,0 +1,362 @@
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  22:37:34         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;===============================================================================
+                      00002 ; Description:
+                      00003 ;       Sample program to play music by connecint a buzzer
+                      00004 ;       to gp2. If you have an electromagnetic buzzer, you
+                      00005 ;       need to wire it to the microcontroller via a transistor
+                      00006 ;       
+                      00007 ;===============================================================================         
+                      00008         #include "p10f200.inc"
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Jul 02 2017
+                      00005 ;  MPASM PIC10F200 processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00152         LIST
+                      00009 
+                      00010 ;===============================================================================
+                      00011 ; Config BITS 
+                      00012 ;===============================================================================         
+                      00013         
+0FFF   0FFB           00014         __CONFIG _WDT_OFF & _CP_OFF & _MCLRE_ON
+                      00015 
+                      00016 ;===============================================================================
+                      00017 ; User defined registers 
+                      00018 ;===============================================================================                
+  00000010            00019 d1          EQU          10      ;define 0x10 register as lower delay byte
+  00000011            00020 d2          EQU          11      ;define 0x11 register as upper delay byte
+  00000012            00021 periods     EQU          12      ;define 0x12 register as number of periods to play
+                      00022 
+                      00023 ;===============================================================================
+                      00024 ; Reset vector 
+                      00025 ;===============================================================================         
+                      00026 RES_VECT  CODE    0x0000            ; processor reset vector
+0000   0A??           00027     GOTO    INIT                   ; go to beginning of program
+                      00028 
+                      00029 ;===============================================================================
+                      00030 ;  Start of program
+                      00031 ;===============================================================================    
+                      00032 MAIN_PROG CODE             
+                      00033 
+Warning[207]: Found label after column 1. (INIT)
+0000                  00034  INIT
+0000   0CDF           00035     MOVLW  ~(1<<T0CS)         ;enable GPIO2
+0001   0002           00036     OPTION                       
+0002   0CFB           00037     MOVLW ~(1 << GP2)          ;set GP2 as an output
+0003   0006           00038     TRIS GPIO
+                      00039 ;===============================================================================
+                      00040 ;  Main routine
+                      00041 ;===============================================================================    
+0004                  00042 LOOP
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  22:37:34         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0004   09??           00043     CALL E2                      ;Play note E of the 2nd octave
+0005   09??           00044     CALL D#2                         ;Play note D# of the 2nd octave
+0006   09??           00045     CALL E2                              ;and so on and so forth
+0007   09??           00046     CALL D#2
+0008   09??           00047     CALL E2
+0009   09??           00048     CALL H1
+000A   09??           00049     CALL D2
+000B   09??           00050     CALL C2
+000C   09??           00051     CALL A1
+000D   09??           00052     CALL A1
+000E   09??           00053     CALL A1
+000F   09??           00054     CALL C1
+0010   09??           00055     CALL E1
+0011   09??           00056     CALL A1
+0012   09??           00057     CALL H1
+0013   09??           00058     CALL H1
+0014   09??           00059     CALL H1
+0015   09??           00060     CALL E1
+0016   09??           00061     CALL G#1
+0017   09??           00062     CALL H1
+0018   09??           00063     CALL C2
+0019   09??           00064     CALL C2
+001A   09??           00065     CALL C2
+001B   0003           00066     SLEEP                        ;Enable sleep mode
+001C   0A??           00067     GOTO LOOP                    ;loop forever
+                      00068     
+                      00069 ;===============================================================================
+                      00070 ;  Subroutines
+                      00071 ;===============================================================================   
+001D                  00072 E2                               ;Note E of the 2nd octave
+001D   0CFF           00073     MOVLW D'255'                 ;Load the number of periods to play
+001E   0032           00074     MOVWF periods
+001F                  00075 LOOP_E2                          ;Toggle pin GP2 with the specified frequency
+001F   0C04           00076     MOVLW (1<<GP2)       
+0020   01A6           00077     XORWF GPIO, F                ;Toggle GP2
+0021   0CFB           00078     MOVLW D'251'         
+0022   0030           00079     MOVWF d1                     ;Load lower delay byte
+0023   0C01           00080     MOVLW 1              
+0024   0031           00081     MOVWF d2                     ;Load upper delay byte
+0025   09??           00082     CALL DELAY                   ;Perform delay
+0026   02F2           00083     DECFSZ periods, F            ;Decrease the number of periods and check if it is 0
+0027   0A??           00084     GOTO LOOP_E2                 ;If no then keep toggling GP2
+0028   0800           00085     RETLW 0                      ;Otherwise return from the subroutine
+                      00086 ;------------------------------------------------------------------------------- 
+                      00087  
+0029                  00088 D#2
+0029   0CF0           00089     MOVLW D'240'
+002A   0032           00090     MOVWF periods
+002B                  00091 LOOP_D#2
+002B   0C04           00092     MOVLW (1<<GP2)
+002C   01A6           00093     XORWF GPIO, F       
+002D   0C0A           00094     MOVLW D'10'
+002E   0030           00095     MOVWF d1
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  22:37:34         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+002F   0C02           00096     MOVLW 2
+0030   0031           00097     MOVWF d2
+0031   09??           00098     CALL DELAY
+0032   02F2           00099     DECFSZ periods, F
+0033   0A??           00100     GOTO LOOP_D#2
+0034   0800           00101     RETLW 0
+                      00102 ;------------------------------------------------------------------------------- 
+                      00103  
+0035                  00104 H1
+0035   0CBF           00105     MOVLW D'191'
+0036   0032           00106     MOVWF periods
+0037                  00107 LOOP_H1
+0037   0C04           00108     MOVLW (1<<GP2)
+0038   01A6           00109     XORWF GPIO, F       
+0039   0C50           00110     MOVLW D'80'
+003A   0030           00111     MOVWF d1
+003B   0C02           00112     MOVLW 2
+003C   0031           00113     MOVWF d2
+003D   09??           00114     CALL DELAY
+003E   02F2           00115     DECFSZ periods, F
+003F   0A??           00116     GOTO LOOP_H1
+0040   0800           00117     RETLW 0
+                      00118 ;------------------------------------------------------------------------------- 
+                      00119  
+0041                  00120 D2
+0041   0CE3           00121     MOVLW D'227'
+0042   0032           00122     MOVWF periods
+0043                  00123 LOOP_D2
+0043   0C04           00124     MOVLW (1<<GP2)
+0044   01A6           00125     XORWF GPIO, F       
+0045   0C1A           00126     MOVLW D'26'
+0046   0030           00127     MOVWF d1
+0047   0C02           00128     MOVLW 2
+0048   0031           00129     MOVWF d2
+0049   09??           00130     CALL DELAY
+004A   02F2           00131     DECFSZ periods, F
+004B   0A??           00132     GOTO LOOP_D2
+004C   0800           00133     RETLW 0
+                      00134 ;------------------------------------------------------------------------------- 
+                      00135  
+004D                  00136 C2
+004D   0CCA           00137     MOVLW D'202'
+004E   0032           00138     MOVWF periods
+004F                  00139 LOOP_C2
+004F   0C04           00140     MOVLW (1<<GP2)
+0050   01A6           00141     XORWF GPIO, F       
+0051   0C3D           00142     MOVLW D'61'
+0052   0030           00143     MOVWF d1
+0053   0C02           00144     MOVLW 2
+0054   0031           00145     MOVWF d2
+0055   09??           00146     CALL DELAY
+0056   02F2           00147     DECFSZ periods, F
+0057   0A??           00148     GOTO LOOP_C2
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  22:37:34         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0058   0800           00149     RETLW 0
+                      00150 ;------------------------------------------------------------------------------- 
+                      00151  
+0059                  00152 A1
+0059   0CAA           00153     MOVLW D'170'
+005A   0032           00154     MOVWF periods
+005B                  00155 LOOP_A1
+005B   0C04           00156     MOVLW (1<<GP2)
+005C   01A6           00157     XORWF GPIO, F        
+005D   0C79           00158     MOVLW D'121'
+005E   0030           00159     MOVWF d1
+005F   0C02           00160     MOVLW 2
+0060   0031           00161     MOVWF d2
+0061   09??           00162     CALL DELAY
+0062   02F2           00163     DECFSZ periods, F
+0063   0A??           00164     GOTO LOOP_A1
+0064   0800           00165     RETLW 0
+                      00166 ;------------------------------------------------------------------------------- 
+                      00167  
+0065                  00168 C1
+0065   0C65           00169     MOVLW D'101'
+0066   0032           00170     MOVWF periods
+0067                  00171 LOOP_C1
+0067   0C04           00172     MOVLW (1<<GP2)
+0068   01A6           00173     XORWF GPIO, F        
+0069   0C7B           00174     MOVLW D'123'
+006A   0030           00175     MOVWF d1
+006B   0C03           00176     MOVLW 3
+006C   0031           00177     MOVWF d2
+006D   09??           00178     CALL DELAY
+006E   02F2           00179     DECFSZ periods, F
+006F   0A??           00180     GOTO LOOP_C1
+0070   0800           00181     RETLW 0
+                      00182 ;------------------------------------------------------------------------------- 
+                      00183  
+0071                  00184 E1
+0071   0C7F           00185     MOVLW D'127'
+0072   0032           00186     MOVWF periods
+0073                  00187 LOOP_E1
+0073   0C04           00188     MOVLW (1<<GP2)
+0074   01A6           00189     XORWF GPIO, F        
+0075   0CF8           00190     MOVLW D'248'
+0076   0030           00191     MOVWF d1
+0077   0C02           00192     MOVLW 2
+0078   0031           00193     MOVWF d2
+0079   09??           00194     CALL DELAY
+007A   02F2           00195     DECFSZ periods, F
+007B   0A??           00196     GOTO LOOP_E1
+007C   0800           00197     RETLW 0
+                      00198 ;------------------------------------------------------------------------------- 
+                      00199  
+007D                  00200 G#1
+007D   0CA0           00201     MOVLW D'160'
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  22:37:34         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+007E   0032           00202     MOVWF periods
+007F                  00203 LOOP_G#1
+007F   0C04           00204     MOVLW (1<<GP2)
+0080   01A6           00205     XORWF GPIO, F        
+0081   0C90           00206     MOVLW D'144'
+0082   0030           00207     MOVWF d1
+0083   0C02           00208     MOVLW 2
+0084   0031           00209     MOVWF d2
+0085   09??           00210     CALL DELAY
+0086   02F2           00211     DECFSZ periods, F
+0087   0A??           00212     GOTO LOOP_G#1
+0088   0800           00213     RETLW 0
+                      00214 ;------------------------------------------------------------------------------- 
+0089                  00215 DELAY                            ;Start DELAY subroutine here
+0089   02F0           00216     DECFSZ d1, F                     ;Decrement the register 0x10 and check if not zero
+008A   0A??           00217     GOTO DELAY                   ;If not then go to the DELAY_LOOP label
+008B   02F1           00218     DECFSZ d2, F                     ;Else decrement the register 0x11, check if it is not 0
+008C   0A??           00219     GOTO DELAY                   ;If not then go to the DELAY_LOOP label
+008D   0800           00220     RETLW 0                      ;Else return from the subroutine
+                      00221 ;===============================================================================
+                      00222 ;  end of program
+                      00223 ;===============================================================================    
+0FFB                  00224     END
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  22:37:34         PAGE  6
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+A1                                00000059
+C                                 00000000
+C1                                00000065
+C2                                0000004D
+CAL0                              00000001
+CAL1                              00000002
+CAL2                              00000003
+CAL3                              00000004
+CAL4                              00000005
+CAL5                              00000006
+CAL6                              00000007
+D#2                               00000029
+D2                                00000041
+DC                                00000001
+DELAY                             00000089
+E1                                00000071
+E2                                0000001D
+F                                 00000001
+FOSC4                             00000000
+FSR                               00000004
+G#1                               0000007D
+GP0                               00000000
+GP1                               00000001
+GP2                               00000002
+GP3                               00000003
+GPIO                              00000006
+GPWUF                             00000007
+H1                                00000035
+INDF                              00000000
+INIT                              00000000
+LOOP                              00000004
+LOOP_A1                           0000005B
+LOOP_C1                           00000067
+LOOP_C2                           0000004F
+LOOP_D#2                          0000002B
+LOOP_D2                           00000043
+LOOP_E1                           00000073
+LOOP_E2                           0000001F
+LOOP_G#1                          0000007F
+LOOP_H1                           00000037
+NOT_GPPU                          00000006
+NOT_GPWU                          00000007
+NOT_PD                            00000003
+NOT_TO                            00000004
+OSCCAL                            00000005
+PCL                               00000002
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+STATUS                            00000003
+T0CS                              00000005
+T0SE                              00000004
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  22:37:34         PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TMR0                              00000001
+TRISIO0                           00000000
+TRISIO1                           00000001
+TRISIO2                           00000002
+TRISIO3                           00000003
+W                                 00000000
+Z                                 00000002
+_CONFIG                           00000FFF
+_CP_OFF                           00000FFF
+_CP_ON                            00000FF7
+_IDLOC0                           00000100
+_IDLOC1                           00000101
+_IDLOC2                           00000102
+_IDLOC3                           00000103
+_IntRC_OSC                        00000FFF
+_MCLRE_OFF                        00000FEF
+_MCLRE_ON                         00000FFF
+_OSC_IntRC                        00000FFF
+_WDTE_OFF                         00000FFB
+_WDTE_ON                          00000FFF
+_WDT_OFF                          00000FFB
+_WDT_ON                           00000FFF
+__10F200                          00000001
+d1                                00000010
+d2                                00000011
+periods                           00000012
+
+Errors   :     0
+Warnings :     1 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

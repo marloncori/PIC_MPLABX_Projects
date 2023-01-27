@@ -1,0 +1,235 @@
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  21:59:00         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;*******************************************************************************
+                      00002 ; TODO INSERT INCLUDE CODE HERE
+                      00003 #include "p10f200.inc"
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Jul 02 2017
+                      00005 ;  MPASM PIC10F200 processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00152         LIST
+                      00004     
+                      00005 ; __config 0xFFEB
+0FFF   0FEB           00006  __CONFIG _WDTE_OFF & _CP_OFF & _MCLRE_OFF
+                      00007 ;*******************************************************************************
+                      00008 ; CONTANT VALUES
+                      00009 ;*******************************************************************************
+                      00010  ; TODO PLACE VARIABLE DEFINITIONS GO HERE
+  00000010            00011 cnt1    EQU  H'10'
+  00000011            00012 cnt2    EQU  H'11'
+                      00013    
+  00000003            00014 BTN_1   EQU  GP3
+  00000001            00015 LED_1   EQU  GP1
+                      00016  
+  00000000            00017 BTN_2   EQU  GP0
+  00000002            00018 LED_2   EQU  GP2
+                      00019    
+                      00020 ;*******************************************************************************
+                      00021 ; Reset Vector
+                      00022 ;*******************************************************************************
+                      00023 
+                      00024 RES_VECT  CODE    0x0000            ; processor reset vector
+0000   0A??           00025     GOTO    START                   ; go to beginning of program
+                      00026 
+                      00027 ;*******************************************************************************
+                      00028 ; MAIN PROGRAM
+                      00029 ;*******************************************************************************
+                      00030 MAIN_PROG CODE                      ; let linker place main program
+                      00031 
+0000                  00032 START                               
+0000   0C9F           00033     MOVLW   ~((1<<T0CS) | (1<<NOT_GPPU)) ; set GP2 pin and pull-up
+0001   0002           00034     OPTION
+0002   0CF9           00035     MOVLW   ~((1<<GP1) | (1<<GP2))  ; set GP1, GP2 as outputs
+0003   0006           00036     TRIS    GPIO
+                      00037     
+                      00038 ;===============================================================================
+                      00039 ;  Main program
+                      00040 ;===============================================================================
+0004                  00041 LOOP
+0004   09??           00042     CALL    CHECK_SW1           ; check button 1 state at gp3 - is it low?
+0005   09??           00043     CALL    CHECK_SW2           ; check button 2 state at gp0 - is it low?
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  21:59:00         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0006   0A??           00044     GOTO    LOOP
+                      00045     
+                      00046 ;==============================================================================
+                      00047 ;  Subroutines
+                      00048 ;==============================================================================
+0007                  00049 CHECK_SW1
+0007   0666           00050     BTFSC   GPIO, BTN_1         ; check if button is state is low
+0008   0A??           00051     GOTO    EXIT1               ; return to main routine if it is high
+0009   09??           00052     CALL    DEBOUNCE            ; or else, call debounce routine
+000A   0666           00053     BTFSC   GPIO, BTN_1         ; check button state again
+000B   0A??           00054     GOTO    EXIT1               ; leave subroutine if it is high
+000C   0766           00055     BTFSS   GPIO, BTN_1         ; otherwise, wait while gp3 is zero
+000D   0A??           00056     GOTO    $ -1                ; loop to wait
+000E   09??           00057     CALL    DEBOUNCE            ; after gp3 is set, btn is released
+000F   09??           00058     CALL    TOGGLE_GREEN        ; call subroutine to change led state    
+0010                  00059 EXIT1
+0010   0800           00060     RETLW   0
+                      00061     
+                      00062 ;-------------------------------------------------------------------------------    
+0011                  00063 CHECK_SW2
+0011   0606           00064     BTFSC   GPIO, BTN_2         ; check if button 2 is pressed (low state)
+0012   0A??           00065     GOTO    EXIT2               ; leave subroutine if it is high
+0013   09??           00066     CALL    DEBOUNCE            ; otherwise, debounce button
+0014                  00067 L_SW2
+0014   0606           00068     BTFSC   GPIO, BTN_2         ; check if button 2 is pressed (low state)
+0015                  00069 EXIT2
+0015   0800           00070     RETLW   0                   ; leave subroutine if it is high
+0016   09??           00071     CALL    TOGGLE_RED
+0017   09??           00072     CALL    DELAY               ; perform long delay before next toggle
+0018   0A??           00073     GOTO    L_SW2               ; and return to the beginning of loop
+                      00074 ;-------------------------------------------------------------------------------        
+0019                  00075 DEBOUNCE
+                      00076     
+0019   0C28           00077     MOVLW    D'40'              ; start debouncing routine by loading
+001A   0030           00078     MOVWF    cnt1               ; W reg with 40 and copy to both   
+001B   0031           00079     MOVWF    cnt2               ; user-created general purpose registers
+001C                  00080 L2  ;---------------------------
+001C   02F0           00081     DECFSZ   cnt1, F            ; decrement first variable
+001D   0A??           00082     GOTO     L2                 ; and repeat process till it equals zero
+001E   02F1           00083     DECFSZ   cnt2, F            ; decrease second var value
+001F   0A??           00084     GOTO     L2                 ; and do it again, till it is zero
+                      00085     ;---------------------------
+0020   0800           00086     RETLW   0                   ; return from subroutine
+                      00087 
+                      00088 ;-------------------------------------------------------------------------------        
+0021                  00089 DELAY
+0021   0CFF           00090     MOVLW    H'FF'              ; start debouncing routine by loading
+0022   0030           00091     MOVWF    cnt1               ; W reg with 255 and copy to both   
+0023   0031           00092     MOVWF    cnt2               ; user-created general purpose registers
+0024                  00093 L3  ;---------------------------
+0024   02F0           00094     DECFSZ   cnt1, F            ; decrement first variable
+0025   0A??           00095     GOTO     L3                 ; and repeat process till it equals zero
+0026   02F1           00096     DECFSZ   cnt2, F            ; decrease second var value
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  21:59:00         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0027   0A??           00097     GOTO     L3                 ; and do it again, till it is zero
+                      00098     ;---------------------------
+0028   0800           00099     RETLW   0                   ; return from subroutine
+                      00100     
+                      00101 ;-------------------------------------------------------------------------------
+0029                  00102 TOGGLE_GREEN
+0029   0C02           00103     MOVLW   (1 << LED_1)        ; otherwise, toggle gp2 state
+002A   01A6           00104     XORWF   GPIO, F             ; by xowring 0000 0010
+002B   0800           00105     RETLW   0
+                      00106     
+                      00107 ;-------------------------------------------------------------------------------    
+002C                  00108 TOGGLE_RED
+002C   0C04           00109     MOVLW   (1 << LED_2)        ; otherwise, toggle gp2 state
+002D   01A6           00110     XORWF   GPIO, F             ; by xowring 0000 0010
+002E   0800           00111     RETLW   0
+                      00112     
+                      00113 ;*******************************************************************************
+0FEB                  00114     END
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  21:59:00         PAGE  4
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+BTN_1                             00000003
+BTN_2                             00000000
+C                                 00000000
+CAL0                              00000001
+CAL1                              00000002
+CAL2                              00000003
+CAL3                              00000004
+CAL4                              00000005
+CAL5                              00000006
+CAL6                              00000007
+CHECK_SW1                         00000007
+CHECK_SW2                         00000011
+DC                                00000001
+DEBOUNCE                          00000019
+DELAY                             00000021
+EXIT1                             00000010
+EXIT2                             00000015
+F                                 00000001
+FOSC4                             00000000
+FSR                               00000004
+GP0                               00000000
+GP1                               00000001
+GP2                               00000002
+GP3                               00000003
+GPIO                              00000006
+GPWUF                             00000007
+INDF                              00000000
+L2                                0000001C
+L3                                00000024
+LED_1                             00000001
+LED_2                             00000002
+LOOP                              00000004
+L_SW2                             00000014
+NOT_GPPU                          00000006
+NOT_GPWU                          00000007
+NOT_PD                            00000003
+NOT_TO                            00000004
+OSCCAL                            00000005
+PCL                               00000002
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+START                             00000000
+STATUS                            00000003
+T0CS                              00000005
+T0SE                              00000004
+TMR0                              00000001
+TOGGLE_GREEN                      00000029
+TOGGLE_RED                        0000002C
+TRISIO0                           00000000
+TRISIO1                           00000001
+TRISIO2                           00000002
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  21:59:00         PAGE  5
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TRISIO3                           00000003
+W                                 00000000
+Z                                 00000002
+_CONFIG                           00000FFF
+_CP_OFF                           00000FFF
+_CP_ON                            00000FF7
+_IDLOC0                           00000100
+_IDLOC1                           00000101
+_IDLOC2                           00000102
+_IDLOC3                           00000103
+_IntRC_OSC                        00000FFF
+_MAIN_PROG_000D                   0000000D
+_MCLRE_OFF                        00000FEF
+_MCLRE_ON                         00000FFF
+_OSC_IntRC                        00000FFF
+_WDTE_OFF                         00000FFB
+_WDTE_ON                          00000FFF
+_WDT_OFF                          00000FFB
+_WDT_ON                           00000FFF
+__10F200                          00000001
+cnt1                              00000010
+cnt2                              00000011
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

@@ -1,0 +1,75 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Sun Oct 23 22:37:36 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                MAIN_PROG       code   0x000003    program   0x00011c
+.config_0FFF_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x000fff    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000090      
+                            0x000fff    0x000fff      
+            146 out of 261 program addresses used, program memory utilization is 55%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                       A1   0x00005c    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                       C1   0x000068    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                       C2   0x000050    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                      D#2   0x00002c    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                       D2   0x000044    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                    DELAY   0x00008c    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                       E1   0x000074    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                       E2   0x000020    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                      G#1   0x000080    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                       H1   0x000038    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                     INIT   0x000003    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                     LOOP   0x000007    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_A1   0x00005e    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_C1   0x00006a    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_C2   0x000052    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                 LOOP_D#2   0x00002e    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_D2   0x000046    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_E1   0x000076    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_E2   0x000022    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                 LOOP_G#1   0x000082    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_H1   0x00003a    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                     INIT   0x000003    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                     LOOP   0x000007    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                       E2   0x000020    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_E2   0x000022    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                      D#2   0x00002c    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                 LOOP_D#2   0x00002e    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                       H1   0x000038    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_H1   0x00003a    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                       D2   0x000044    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_D2   0x000046    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                       C2   0x000050    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_C2   0x000052    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                       A1   0x00005c    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_A1   0x00005e    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                       C1   0x000068    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_C1   0x00006a    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                       E1   0x000074    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                  LOOP_E1   0x000076    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                      G#1   0x000080    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                 LOOP_G#1   0x000082    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+                    DELAY   0x00008c    program     static C:\Users\NUC\MPLABXProject\asm_10f200_music.X\pic_8b_simple.asm
+
+

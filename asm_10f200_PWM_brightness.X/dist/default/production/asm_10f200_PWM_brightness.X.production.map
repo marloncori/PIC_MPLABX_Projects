@@ -1,0 +1,54 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Sun Oct 23 20:05:15 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                MAIN_PROG       code   0x000003    program   0x000046
+                      ISR       code   0x000004    program   0x000000
+.config_0FFF_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x000fff    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000025      
+                            0x000fff    0x000fff      
+            39 out of 261 program addresses used, program memory utilization is 14%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+           DEC_BRIGHTNESS   0x000016    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+                    DELAY   0x000021    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+                       L1   0x000009    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+                       L2   0x000023    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+                     LOOP   0x000006    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+                   RETFIE   0x000004    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+                  SET_DIR   0x00001f    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+                    START   0x000003    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+               TOGGLE_DIR   0x00001b    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+          _MAIN_PROG_0009   0x00000c    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000003    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+                   RETFIE   0x000004    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+                     LOOP   0x000006    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+                       L1   0x000009    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+          _MAIN_PROG_0009   0x00000c    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+           DEC_BRIGHTNESS   0x000016    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+               TOGGLE_DIR   0x00001b    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+                  SET_DIR   0x00001f    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+                    DELAY   0x000021    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+                       L2   0x000023    program     static C:\Users\NUC\MPLABXProject\asm_10f200_PWM_brightness.X\pic_8b_simple.asm
+
+

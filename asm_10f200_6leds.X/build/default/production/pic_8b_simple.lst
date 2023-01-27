@@ -1,0 +1,256 @@
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  22:23:06         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;===============================================================================
+                      00002 ; INCLUDE and CONFIG CODE 
+                      00003 ;===============================================================================    
+                      00004 #include "p10f200.inc"
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Jul 02 2017
+                      00005 ;  MPASM PIC10F200 processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00152         LIST
+                      00005     
+                      00006 ; __config 0xFFEB
+0FFF   0FEB           00007  __CONFIG _WDTE_OFF & _CP_OFF & _MCLRE_OFF
+                      00008 
+                      00009 ;===============================================================================
+                      00010 ; Variable definition 
+                      00011 ;===============================================================================    
+  00000010            00012 i        EQU     H'10'          ;define 0x10 register as the delay variable
+  00000011            00013 j        EQU     H'11'          ;define 0x11 register as the delay variable
+  00000012            00014 k        EQU     H'12'          ;define 0x12 register as the delay variable
+  00000013            00015 led      EQU     H'13'          ;define 0x13 register as the LED number
+                      00016 
+                      00017 ;===============================================================================
+                      00018 ; Reset vector 
+                      00019 ;===============================================================================         
+                      00020 RES_VECT  CODE    0x0000            ; processor reset vector
+0000   0A??           00021     GOTO    INIT                   ; go to beginning of program
+                      00022 
+                      00023 ;===============================================================================
+                      00024 ;  Start of program
+                      00025 ;===============================================================================    
+                      00026 MAIN_PROG CODE                      ; let linker place main program
+                      00027 
+0000                  00028 INIT
+0000   0CDF           00029     MOVLW  ~(1<<T0CS)           ;Enable GPIO2
+0001   0002           00030     OPTION    
+0002   0C07           00031     MOVLW ((1 << GP0)|(1 << GP1)|(1 << GP2));;set GP0, GP1, GP2 as inputs
+0003   0006           00032     TRIS GPIO
+                      00033     
+                      00034 ;===============================================================================
+                      00035 ;  Main routine
+                      00036 ;===============================================================================    
+0004                  00037 LOOP
+0004   0C01           00038     MOVLW 1                      ;Light up LED1
+0005   09??           00039     CALL LIGHT_LED
+0006   0C02           00040     MOVLW 2                      ;Light up LED2
+0007   09??           00041     CALL LIGHT_LED
+0008   0C03           00042     MOVLW 3                      ;Light up LED3
+0009   09??           00043     CALL LIGHT_LED
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  22:23:06         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000A   0C04           00044     MOVLW 4                      ;Light up LED4
+000B   09??           00045     CALL LIGHT_LED
+000C   0C05           00046     MOVLW 5                      ;Light up LED5
+000D   09??           00047     CALL LIGHT_LED
+000E   0C06           00048     MOVLW 6                      ;Light up LED6
+000F   09??           00049     CALL LIGHT_LED
+0010   0C05           00050     MOVLW 5                      ;Light up LED5
+0011   09??           00051     CALL LIGHT_LED
+0012   0C04           00052     MOVLW 4                      ;Light up LED4
+0013   09??           00053     CALL LIGHT_LED
+0014   0C03           00054     MOVLW 3                      ;Light up LED3
+0015   09??           00055     CALL LIGHT_LED
+0016   0C02           00056     MOVLW 2                      ;Light up LED2
+0017   09??           00057     CALL LIGHT_LED
+0018   0A??           00058     GOTO LOOP                    ;loop forever
+                      00059     
+                      00060 ;===============================================================================
+                      00061 ;  Subroutines
+                      00062 ;===============================================================================    
+0019                  00063 DELAY                            ;Start DELAY subroutine here
+0019   0C02           00064     MOVLW 2                      ;Load initial value for the delay    
+001A   0030           00065     MOVWF i                      ;Copy the value to the register 0x10
+001B   0031           00066     MOVWF j                      ;Copy the value to the register 0x11
+001C   0032           00067     MOVWF k                      ;Copy the value to the register 0x12
+                      00068 ;------------------------------------------------------------------------------    
+001D                  00069 DELAY_LOOP                       ;Start delay loop
+001D   02F0           00070     DECFSZ i, F                  ;Decrement the register i and check if not zero
+001E   0A??           00071     GOTO DELAY_LOOP              ;If not then go to the DELAY_LOOP label
+001F   02F1           00072     DECFSZ j, F                  ;Else decrement the register j, check if it is not 0
+0020   0A??           00073     GOTO DELAY_LOOP              ;If not then go to the DELAY_LOOP label
+0021   02F2           00074     DECFSZ k, F                  ;Else decrement the register k, check if it is not 0
+0022   0A??           00075     GOTO DELAY_LOOP              ;If not then go to the DELAY_LOOP label
+0023   0800           00076     RETLW 0                      ;Else return from the subroutine
+                      00077 ;------------------------------------------------------------------------------ 
+0024                  00078 SELECT_LED                       ;Turn on LED1
+0024   02F3           00079     DECFSZ led, F                ;Decrement the register 'led' and check if not zero
+0025   0A??           00080     GOTO LED2                    ;If not then go to the LED2 label    
+0026   0CFC           00081     MOVLW ~((1 << GP0)|(1 << GP1))
+0027   0006           00082     TRIS GPIO                    ;Otherwise set GP0 and GP1 as outputs
+0028   0C01           00083     MOVLW 1 << GP0               ;Set GP0 pin as output high
+0029   0026           00084     MOVWF GPIO
+002A   0800           00085     RETLW 0                      ;and return from the subroutine
+                      00086 ;------------------------------------------------------------------------------    
+002B                  00087 LED2
+002B   02F3           00088     DECFSZ led, F                    ;Decrement the register 'led' and check if not zero
+002C   0A??           00089     GOTO LED3                    ;If not then go to the LED3 label    
+002D   0CFC           00090     MOVLW ~((1 << GP0)|(1 << GP1))
+002E   0006           00091     TRIS GPIO                    ;Otherwise set GP0 and GP1 as outputs
+002F   0C02           00092     MOVLW 1 << GP1               ;Set GP1 pin as output high    
+0030   0026           00093     MOVWF GPIO
+0031   0800           00094     RETLW 0                      ;and return from the subroutine
+                      00095 ;------------------------------------------------------------------------------    
+0032                  00096 LED3
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  22:23:06         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0032   02F3           00097     DECFSZ led, F                    ;Decrement the register 'led' and check if not zero
+0033   0A??           00098     GOTO LED4                    ;If not then go to the LED4 label    
+0034   0CF9           00099     MOVLW ~((1 << GP1)|(1 << GP2))
+0035   0006           00100     TRIS GPIO                    ;Otherwise set GP1 and GP2 as outputs
+0036   0C02           00101     MOVLW 1 << GP1               ;Set GP1 pin as output high
+0037   0026           00102     MOVWF GPIO
+0038   0800           00103     RETLW 0                      ;and return from the subroutine
+                      00104 ;------------------------------------------------------------------------------    
+0039                  00105 LED4
+0039   02F3           00106     DECFSZ led, F                    ;Decrement the register 'led' and check if not zero
+003A   0A??           00107     GOTO LED5                    ;If not then go to the LED5 label    
+003B   0CF9           00108     MOVLW ~((1 << GP1)|(1 << GP2))
+003C   0006           00109     TRIS GPIO                    ;Otherwise set GP1 and GP2 as outputs
+003D   0C04           00110     MOVLW 1 << GP2               ;Set GP2 pin as output high
+003E   0026           00111     MOVWF GPIO
+003F   0800           00112     RETLW 0                      ;and return from the subroutine
+                      00113 ;------------------------------------------------------------------------------    
+0040                  00114 LED5
+0040   02F3           00115     DECFSZ led, F                    ;Decrement the register 'led' and check if not zero
+0041   0A??           00116     GOTO LED6                    ;If not then go to the LED6 label    
+0042   0CFA           00117     MOVLW ~((1 << GP0)|(1 << GP2))
+0043   0006           00118     TRIS GPIO                    ;Otherwise set GP0 and GP2 as outputs
+0044   0C01           00119     MOVLW 1 << GP0              ;Set GP0 pin as output high
+0045   0026           00120     MOVWF GPIO
+0046   0800           00121     RETLW 0                      ;and return from the subroutine
+                      00122 ;------------------------------------------------------------------------------    
+0047                  00123 LED6
+0047   02F3           00124     DECFSZ led, F                    ;Decrement the register 'led' and check if not zero
+0048   0800           00125     RETLW 0                      ;If not return from the subroutine    
+0049   0CFA           00126     MOVLW ~((1 << GP0)|(1 << GP2))
+004A   0006           00127     TRIS GPIO                    ;Otherwise set GP0 and GP2 as outputs
+004B   0C04           00128     MOVLW 1 << GP2              ;Set GP2 pin as output high
+004C   0026           00129     MOVWF GPIO
+004D   0800           00130     RETLW 0                      ;and return from the subroutine
+                      00131  ;------------------------------------------------------------------------------
+004E                  00132 LIGHT_LED                        ;Light one LED and perform delay
+004E   0033           00133     MOVWF led                    ;Copy the content of the W into 'led' register
+004F   09??           00134     CALL SELECT_LED             ;Call SELECT_LED subroutine
+0050   09??           00135     CALL DELAY                   ;Call DELAY subroutine
+0051   0800           00136     RETLW 0                      ;Return from the subroutine
+                      00137 ;===============================================================================
+                      00138 ;   end of application
+                      00139 ;===============================================================================    
+0FEB                  00140     END   
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  22:23:06         PAGE  4
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+C                                 00000000
+CAL0                              00000001
+CAL1                              00000002
+CAL2                              00000003
+CAL3                              00000004
+CAL4                              00000005
+CAL5                              00000006
+CAL6                              00000007
+DC                                00000001
+DELAY                             00000019
+DELAY_LOOP                        0000001D
+F                                 00000001
+FOSC4                             00000000
+FSR                               00000004
+GP0                               00000000
+GP1                               00000001
+GP2                               00000002
+GP3                               00000003
+GPIO                              00000006
+GPWUF                             00000007
+INDF                              00000000
+INIT                              00000000
+LED2                              0000002B
+LED3                              00000032
+LED4                              00000039
+LED5                              00000040
+LED6                              00000047
+LIGHT_LED                         0000004E
+LOOP                              00000004
+NOT_GPPU                          00000006
+NOT_GPWU                          00000007
+NOT_PD                            00000003
+NOT_TO                            00000004
+OSCCAL                            00000005
+PCL                               00000002
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+SELECT_LED                        00000024
+STATUS                            00000003
+T0CS                              00000005
+T0SE                              00000004
+TMR0                              00000001
+TRISIO0                           00000000
+TRISIO1                           00000001
+TRISIO2                           00000002
+TRISIO3                           00000003
+W                                 00000000
+Z                                 00000002
+_CONFIG                           00000FFF
+_CP_OFF                           00000FFF
+_CP_ON                            00000FF7
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-23-2022  22:23:06         PAGE  5
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_IDLOC0                           00000100
+_IDLOC1                           00000101
+_IDLOC2                           00000102
+_IDLOC3                           00000103
+_IntRC_OSC                        00000FFF
+_MCLRE_OFF                        00000FEF
+_MCLRE_ON                         00000FFF
+_OSC_IntRC                        00000FFF
+_WDTE_OFF                         00000FFB
+_WDTE_ON                          00000FFF
+_WDT_OFF                          00000FFB
+_WDT_ON                           00000FFF
+__10F200                          00000001
+i                                 00000010
+j                                 00000011
+k                                 00000012
+led                               00000013
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

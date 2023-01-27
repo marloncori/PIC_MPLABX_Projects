@@ -1,0 +1,59 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Sun Oct 23 23:00:15 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                MAIN_PROG       code   0x000003    program   0x00009e
+.config_0FFF_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x000fff    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000051      
+                            0x000fff    0x000fff      
+            83 out of 261 program addresses used, program memory utilization is 31%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+            CHECK_BUTTONS   0x000039    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+               CHECK_CODE   0x000022    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+                    DELAY   0x000040    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+               DELAY_LOOP   0x000042    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+                INIT_REGS   0x000032    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+               LOCK_CLOSE   0x00002f    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+                LOCK_OPEN   0x00002c    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+                     LOOP   0x00000a    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+         MANIPULATE_SERVO   0x000047    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+             READ_BUTTONS   0x00000b    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+               SERVO_MOVE   0x000049    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+                    START   0x000003    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+          _MAIN_PROG_0016   0x000019    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000003    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+                     LOOP   0x00000a    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+             READ_BUTTONS   0x00000b    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+          _MAIN_PROG_0016   0x000019    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+               CHECK_CODE   0x000022    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+                LOCK_OPEN   0x00002c    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+               LOCK_CLOSE   0x00002f    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+                INIT_REGS   0x000032    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+            CHECK_BUTTONS   0x000039    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+                    DELAY   0x000040    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+               DELAY_LOOP   0x000042    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+         MANIPULATE_SERVO   0x000047    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+               SERVO_MOVE   0x000049    program     static C:\Users\NUC\MPLABXProject\asm_10f200_btns_servo.X\pic_8b_simple.asm
+
+

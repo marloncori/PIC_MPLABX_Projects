@@ -1,0 +1,182 @@
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-24-2022  0:25:24         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;*******************************************************************************
+                      00002 ; Line following robot, resource
+                      00003 ;*******************************************************************************
+                      00004 
+                      00005 #include "p10f200.inc"
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Jul 02 2017
+                      00005 ;  MPASM PIC10F200 processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00152         LIST
+0FFF   0FEB           00006         __CONFIG _WDT_OFF & _CP_OFF & _MCLRE_OFF
+                      00007  
+  00000010            00008 i                EQU 10          ;Delay register 1
+  00000011            00009 j                EQU 11          ;Delay register 2
+  00000012            00010 servo1           EQU 12          ;Servo1 pulse width
+  00000013            00011 servo2           EQU 13          ;Servo2 pulse width
+                      00012  
+                      00013 ;*******************************************************************************
+                      00014 ; Reset Vector
+                      00015 ;*******************************************************************************
+                      00016 RES_VECT  CODE    0x0000            ; processor reset vector
+Error[113]  : Symbol not previously defined (START)
+0000   0A00           00017     GOTO    START                   ; go to beginning of program
+                      00018 
+                      00019 ;*******************************************************************************
+                      00020 ; Start of program
+                      00021 ;*******************************************************************************
+                      00022 MAIN_PROG CODE
+                      00023                          
+0000                  00024 INIT
+0000   0CDF           00025         MOVLW ~(1<<T0CS)
+0001   0002           00026         OPTION                           ;Enable GP2
+0002   0CFA           00027         MOVLW ~((1 << GP0) | (1 << GP2))    
+0003   0006           00028         TRIS GPIO                ;Set GP0 and GP2 as outputs
+0004                  00029 LOOP
+0004   0626           00030     BTFSC GPIO, GP1      ;Check if GP1 is low (sensor is above the line)
+0005   0A??           00031     GOTO MOVE_RIGHT      ;If not then go to the MOVE_RIGHT label
+0006                  00032 MOVE_LEFT                        ;Move the robot to the left
+0006   0CC8           00033     MOVLW D'200'         ;Load the delay value for the servo 1
+0007   0032           00034     MOVWF servo1         
+0008   0CD7           00035     MOVLW D'215'         ;Load the delay value for the servo 2
+0009   0033           00036     MOVWF servo2
+000A   0A??           00037     GOTO CONTROL_SERVO    ;Go to the CONTROL_SERVO label
+000B                  00038 MOVE_RIGHT                       ;Move robot to the right
+000B   0CCE           00039     MOVLW D'206'         ;Load the delay value for the servo 1
+000C   0032           00040     MOVWF servo1
+000D   0CDC           00041     MOVLW D'220'         ;Load the delay value for the servo 2
+000E   0033           00042     MOVWF servo2
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-24-2022  0:25:24         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000F                  00043 CONTROL_SERVO                    ;Control the servo 1
+000F   0546           00044     BSF GPIO, GP2        ;Set GP2 high
+0010   0C02           00045     MOVLW D'2'                   ;Load 2 into the second delay register 'j'
+0011   0031           00046     MOVWF j
+0012   0212           00047     MOVF servo1, W       ;Copy the value of the servo1 into the W
+0013   09??           00048     CALL DELAY                   ;and call the delay
+0014   0446           00049     BCF GPIO, GP2        ;Then seth GP2 low
+0015   0000           00050     NOP                                 ;One cycle delay before the BSF instruction
+0016                  00051 SERVO_2                                  ;Control the servo 2
+0016   0506           00052     BSF GPIO, GP0        ;Set GP0 high
+0017   0C02           00053     MOVLW D'2'                   ;Load 2 into the second delay register 'j'
+0018   0031           00054     MOVWF j    
+0019   0213           00055     MOVF servo2, W       ;Copy the value of the servo2 into the W
+001A   09??           00056     CALL DELAY                   ;and call the delay
+001B   0406           00057     BCF GPIO, GP0        ;Then seth GP0 low
+001C                  00058 PAUSE                                    ;Pause between the pulses
+001C   0C19           00059     MOVLW D'25'                  ;Load 25 into the second delay register 'j'
+001D   0031           00060     MOVWF j
+001E   09??           00061     CALL DELAY                   ;and call the delay
+001F   0A??           00062         GOTO LOOP                ;Return to the 'LOOP' label
+                      00063  
+0020                  00064 DELAY                                    ;Start DELAY subroutine here
+0020   0030           00065     MOVWF i                      ;Load the W value into the 'i' register
+0021                  00066 DELAY_LOOP
+0021   02F0           00067     DECFSZ i, F                  ;Decrement i and check if it is not zero
+0022   0A??           00068     GOTO DELAY_LOOP      ;If not, then go to the DELAY_LOOP label
+0023   02F1           00069     DECFSZ j, F                  ;Decrement j and check if it is not zero
+0024   0A??           00070     GOTO DELAY_LOOP      ;If not, then go to the DELAY_LOOP label
+0025   0800           00071     RETLW 0                      ;Else return from the subroutine
+                      00072  
+0FEB                  00073         END
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-24-2022  0:25:24         PAGE  3
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+C                                 00000000
+CAL0                              00000001
+CAL1                              00000002
+CAL2                              00000003
+CAL3                              00000004
+CAL4                              00000005
+CAL5                              00000006
+CAL6                              00000007
+CONTROL_SERVO                     0000000F
+DC                                00000001
+DELAY                             00000020
+DELAY_LOOP                        00000021
+F                                 00000001
+FOSC4                             00000000
+FSR                               00000004
+GP0                               00000000
+GP1                               00000001
+GP2                               00000002
+GP3                               00000003
+GPIO                              00000006
+GPWUF                             00000007
+INDF                              00000000
+INIT                              00000000
+LOOP                              00000004
+MOVE_LEFT                         00000006
+MOVE_RIGHT                        0000000B
+NOT_GPPU                          00000006
+NOT_GPWU                          00000007
+NOT_PD                            00000003
+NOT_TO                            00000004
+OSCCAL                            00000005
+PAUSE                             0000001C
+PCL                               00000002
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+SERVO_2                           00000016
+STATUS                            00000003
+T0CS                              00000005
+T0SE                              00000004
+TMR0                              00000001
+TRISIO0                           00000000
+TRISIO1                           00000001
+TRISIO2                           00000002
+TRISIO3                           00000003
+W                                 00000000
+Z                                 00000002
+_CONFIG                           00000FFF
+_CP_OFF                           00000FFF
+_CP_ON                            00000FF7
+_IDLOC0                           00000100
+_IDLOC1                           00000101
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-24-2022  0:25:24         PAGE  4
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_IDLOC2                           00000102
+_IDLOC3                           00000103
+_IntRC_OSC                        00000FFF
+_MCLRE_OFF                        00000FEF
+_MCLRE_ON                         00000FFF
+_OSC_IntRC                        00000FFF
+_WDTE_OFF                         00000FFB
+_WDTE_ON                          00000FFF
+_WDT_OFF                          00000FFB
+_WDT_ON                           00000FFF
+__10F200                          00000001
+i                                 00000010
+j                                 00000011
+servo1                            00000012
+servo2                            00000013
+
+Errors   :     1
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+
