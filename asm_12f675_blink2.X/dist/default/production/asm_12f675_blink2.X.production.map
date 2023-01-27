@@ -1,0 +1,43 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Sat Oct 22 02:26:40 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_0       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x000056
+.config_2007_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x00002f      
+                            0x002007    0x002007      
+            48 out of 1158 program addresses used, program memory utilization is 4%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    Delay   0x000023    program     static C:\Users\NUC\MPLABXProject\asm_12f675_blink2.X\pic_8b_simple.asm
+                     Loop   0x000027    program     static C:\Users\NUC\MPLABXProject\asm_12f675_blink2.X\pic_8b_simple.asm
+                     MAIN   0x000017    program     static C:\Users\NUC\MPLABXProject\asm_12f675_blink2.X\pic_8b_simple.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProject\asm_12f675_blink2.X\pic_8b_simple.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProject\asm_12f675_blink2.X\pic_8b_simple.asm
+                     MAIN   0x000017    program     static C:\Users\NUC\MPLABXProject\asm_12f675_blink2.X\pic_8b_simple.asm
+                    Delay   0x000023    program     static C:\Users\NUC\MPLABXProject\asm_12f675_blink2.X\pic_8b_simple.asm
+                     Loop   0x000027    program     static C:\Users\NUC\MPLABXProject\asm_12f675_blink2.X\pic_8b_simple.asm
+
+

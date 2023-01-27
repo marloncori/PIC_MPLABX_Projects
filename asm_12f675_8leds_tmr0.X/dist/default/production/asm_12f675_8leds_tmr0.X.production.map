@@ -1,0 +1,52 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Mon Oct 24 01:06:15 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                MAIN_PROG       code   0x000003    program   0x00006e
+                   .org_0       code   0x000004    program   0x000000
+.config_2007_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000039      
+                            0x002007    0x002007      
+            59 out of 1158 program addresses used, program memory utilization is 5%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+               BLINK_LEDS   0x000013    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                       L1   0x00001d    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                     MAIN   0x000011    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                   REFTIE   0x000004    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                    START   0x000003    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                    TASK1   0x000021    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                    TASK2   0x000027    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                    TASK3   0x00002d    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                    TASK4   0x000033    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000003    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                   REFTIE   0x000004    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                     MAIN   0x000011    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+               BLINK_LEDS   0x000013    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                       L1   0x00001d    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                    TASK1   0x000021    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                    TASK2   0x000027    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                    TASK3   0x00002d    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+                    TASK4   0x000033    program     static C:\Users\NUC\MPLABXProject\asm_12f675_8leds_tmr0.X\pic_8b_simple.asm
+
+
