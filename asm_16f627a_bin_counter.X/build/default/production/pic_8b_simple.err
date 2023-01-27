@@ -1,0 +1,5 @@
+Message[302] C:\USERS\NUC\MPLABXPROJECT\ASM_16F627A_BIN_COUNTER.X\PIC_8B_SIMPLE.ASM 57 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECT\ASM_16F627A_BIN_COUNTER.X\PIC_8B_SIMPLE.ASM 71 : Using default destination of 1 (file).
+Warning[219] C:\USERS\NUC\MPLABXPROJECT\ASM_16F627A_BIN_COUNTER.X\PIC_8B_SIMPLE.ASM 84 : Invalid RAM location specified.
+Warning[219] C:\USERS\NUC\MPLABXPROJECT\ASM_16F627A_BIN_COUNTER.X\PIC_8B_SIMPLE.ASM 90 : Invalid RAM location specified.
+Message[305] C:\USERS\NUC\MPLABXPROJECT\ASM_16F627A_BIN_COUNTER.X\PIC_8B_SIMPLE.ASM 103 : Using default destination of 1 (file).

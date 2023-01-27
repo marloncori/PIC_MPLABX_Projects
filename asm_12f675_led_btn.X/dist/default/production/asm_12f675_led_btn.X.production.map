@@ -1,0 +1,57 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Sat Oct 22 03:43:37 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_0       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x000080
+.config_2007_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x000044      
+                            0x002007    0x002007      
+            69 out of 1158 program addresses used, program memory utilization is 5%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                  BTN_ISR   0x000030    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                    CYCLE   0x00002a    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                    DELAY   0x000024    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                      FOR   0x000020    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                     MAIN   0x00001c    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                   REPEAT   0x000026    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+               TMR0_DELAY   0x000029    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                     WAIT   0x000039    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                  exitISR   0x00003f    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                   notGP2   0x000043    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                     MAIN   0x00001c    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                      FOR   0x000020    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                    DELAY   0x000024    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                   REPEAT   0x000026    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+               TMR0_DELAY   0x000029    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                    CYCLE   0x00002a    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                  BTN_ISR   0x000030    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                     WAIT   0x000039    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                  exitISR   0x00003f    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+                   notGP2   0x000043    program     static C:\Users\NUC\MPLABXProject\asm_12f675_led_btn.X\pic_8b_simple.asm
+
+
