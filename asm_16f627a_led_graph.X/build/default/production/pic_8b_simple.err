@@ -1,0 +1,7 @@
+Warning[205] C:\USERS\NUC\MPLABXPROJECT\ASM_16F627A_LED_GRAPH.X\PIC_8B_SIMPLE.ASM 24 : Found directive in column 1. (CBLOCK)
+Warning[205] C:\USERS\NUC\MPLABXPROJECT\ASM_16F627A_LED_GRAPH.X\PIC_8B_SIMPLE.ASM 32 : Found directive in column 1. (ENDC)
+Message[302] C:\USERS\NUC\MPLABXPROJECT\ASM_16F627A_LED_GRAPH.X\PIC_8B_SIMPLE.ASM 56 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECT\ASM_16F627A_LED_GRAPH.X\PIC_8B_SIMPLE.ASM 57 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECT\ASM_16F627A_LED_GRAPH.X\PIC_8B_SIMPLE.ASM 99 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECT\ASM_16F627A_LED_GRAPH.X\PIC_8B_SIMPLE.ASM 113 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECT\ASM_16F627A_LED_GRAPH.X\PIC_8B_SIMPLE.ASM 120 : Using default destination of 1 (file).

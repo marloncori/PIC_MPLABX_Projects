@@ -1,0 +1,87 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Fri Oct 21 04:03:14 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_0       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x00013a
+.config_2007_BUILD/DEFAULT/PRODUCTION/NEWPIC_       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x0000a1      
+                            0x002007    0x002007      
+            162 out of 4230 program addresses used, program memory utilization is 3%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                  ExitISR   0x00009b    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                 FrameErr   0x000098    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                     Loop   0x000011    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                  OverErr   0x000094    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                  RX_Echo   0x00004c    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                  TX_Done   0x000025    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                USART_ISR   0x000081    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+               USART_Init   0x000014    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                  endEcho   0x000080    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+             turnOffGreen   0x00002e    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+            turnOffGreen2   0x00003a    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+            turnOffGreen3   0x000046    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+               turnOffRed   0x000032    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+              turnOffRed2   0x00003e    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+              turnOffRed3   0x00004a    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+               turnOffYel   0x000036    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+              turnOffYel2   0x000042    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+              turnOnGreen   0x00002c    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+             turnOnGreen2   0x000038    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+             turnOnGreen3   0x000044    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                turnOnRed   0x000030    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+               turnOnRed2   0x00003c    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+               turnOnRed3   0x000048    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                turnOnYel   0x000034    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+               turnOnYel2   0x000040    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                     Loop   0x000011    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+               USART_Init   0x000014    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                  TX_Done   0x000025    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+              turnOnGreen   0x00002c    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+             turnOffGreen   0x00002e    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                turnOnRed   0x000030    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+               turnOffRed   0x000032    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                turnOnYel   0x000034    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+               turnOffYel   0x000036    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+             turnOnGreen2   0x000038    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+            turnOffGreen2   0x00003a    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+               turnOnRed2   0x00003c    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+              turnOffRed2   0x00003e    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+               turnOnYel2   0x000040    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+              turnOffYel2   0x000042    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+             turnOnGreen3   0x000044    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+            turnOffGreen3   0x000046    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+               turnOnRed3   0x000048    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+              turnOffRed3   0x00004a    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                  RX_Echo   0x00004c    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                  endEcho   0x000080    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                USART_ISR   0x000081    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                  OverErr   0x000094    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                 FrameErr   0x000098    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+                  ExitISR   0x00009b    program     static C:\Users\NUC\MPLABXProject\asm_16f873a_usart_led_ctl.X\newpic_8b_simple.asm
+
+

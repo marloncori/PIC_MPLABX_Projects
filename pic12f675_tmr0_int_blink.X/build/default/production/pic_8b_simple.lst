@@ -1,0 +1,418 @@
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-24-2022  0:26:42         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 
+                      00002 ;=================================================================
+                      00003 ; Description
+                      00004 ;    
+                      00005 ;       Program to blink led using a precisely calculated
+                      00006 ;       one second delay. Internal 4MHz oscillator is used,
+                      00007 ;       with a 256 prescaler, max count will be 244, the offset
+                      00008 ;       from 256-244 is the TMR0 initial value. 
+                      00009 ;    
+                      00010 ;       Furthermore, a variable called 'intCycl' has been 
+                      00011 ;       created to check if the needed 16 interrupt cycles 
+                      00012 ;       have been reached so GPIO state can be toggled.
+                      00013 ;
+                      00014 ;       In case a 2 sec delay is desired, intCycl = 31 and TMR0
+                      00015 ;       starting point will be 4 , with a max count per cycle of
+                      00016 ;       252. Machine cycle equals 0.000256 seconds
+                      00017 ;    
+                      00018 ;       For a half second delay, intCycl wil be 8 and TMR0
+                      00019 ;       value equals 12, with a max count per cycle of 244      
+                      00020 ;    
+                      00021 ;=================================================================
+                      00022 #include "p12f675.inc"
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Jul 02 2017
+                      00005 ;  MPASM PIC12F675 processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00367         LIST
+                      00023 
+                      00024 ; __config 0xF1B5
+2007   3F94           00025  __CONFIG _FOSC_INTRCIO & _WDTE_OFF & _PWRTE_OFF & _MCLRE_OFF & _BOREN_OFF & _CP_OFF & _CPD_OFF
+                      00026 
+                      00027 ;=================================================================
+                      00028 ; MACROS
+                      00029 ;============================================================
+                      00030 ; Macros to select the register banks
+                      00031 Bank0   MACRO               ; Select RAM bank 0
+                      00032         BCF     STATUS,RP0
+                      00033         ENDM
+                      00034 ;----------------------------------------------
+                      00035 Bank1   MACRO               ; Select RAM bank 1
+                      00036         BSF     STATUS,RP0
+                      00037         ENDM    
+                      00038 ;===============================================================================
+                      00039 ; variables in PIC RAM
+                      00040 ;===============================================================================        
+                      00041 ; Constant value        
+  0000000C            00042 OFFSET     EQU      H'0C'       
+                      00043 ;-------------------------------------------------------------------------------
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-24-2022  0:26:42         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00044            
+                      00045 ; Global variables
+Warning[205]: Found directive in column 1. (CBLOCK)
+                      00046 CBLOCK           H'20'   ; Start of memory block
+  00000020            00047     intCycl                         ; total cycles of interrupt to
+                      00048                                     ; achieve desired delay time
+  00000021            00049     W_TEMP                          ; registers needed for context 
+  00000022            00050     STATUS_TEMP                     ; savigin in ISR
+Warning[205]: Found directive in column 1. (ENDC)
+                      00051 ENDC
+                      00052 ;===============================================================================
+                      00053 RES_VECT  CODE    H'0000'           ; processor reset vector
+0000   2???           00054     GOTO    START                   ; go to beginning of program
+                      00055 ;===============================================================================
+                      00056 ; add interrupts here if used
+                      00057     ORG     H'0004'
+0004   2???           00058     GOTO    LED_ISR
+                      00059 ;===============================================================================    
+                      00060 ; PROGRAM
+                      00061 ;===============================================================================
+                      00062 MAIN_PROG CODE                      ; let linker place main program
+                      00063 
+0000                  00064 START
+                      00065     Bank0           
+0000   1283               M         BCF     STATUS,RP0
+0001   0185           00066     CLRF    GPIO                    ; clear gpio
+0002   3007           00067     MOVLW   H'07'                   ; copy value to W reg
+0003   0099           00068     MOVWF   CMCON                   ; turn off comparators
+                      00069     ;---------------------------------------------------------------------------
+                      00070     Bank1                           ; select bank 1  
+0004   1683               M         BSF     STATUS,RP0
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0005   019F           00071     CLRF    ANSEL                   ; gpio as digital
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0006   0185           00072     CLRF    TRISIO                  ; clear port to set it as output 
+                      00073                                     ; this is done according to the datasheet --
+0007   23FF           00074     CALL    3FFh                    ; get CALL value to callibrate
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0008   0090           00075     MOVWF   OSCCAL                  ; the 4 MHz internal oscillator ------------
+0009   3087           00076     MOVLW   H'87'                   ; B'0000 0111', prescaler 1:256
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000A   0081           00077     MOVWF   OPTION_REG      
+                      00078         ; bit7 - rbpu (internal pull-ups), 0 enable, 1 disabled
+                      00079         ; bit6 - intedg, 0 falling edge, 1 raising edge
+                      00080         ; bit5 - tocs (tmr0 clock src), 0 - interal clock, 1 ra4/tockI bit src
+                      00081         ; bit4 - tose (tmr0 edge select), 0 inc low-to-high, 1 inc high-to-low
+                      00082         ; bit3 - psa (prescaler assing) 1 to WDT, 0 to timer0
+                      00083         ; bit2-0: value for timer0 prescaler --> 101 = 1:64,  **111 = 1:256**
+                      00084         ; 000 = 1:2, 010 = 1:8, 100 = 1:32, 110 = 1:128, 001 = 1:3, 011 = 1:16
+                      00085         
+                      00086 ;-------------------------------------------------------------------------------    
+                      00087     Bank0                           ; go back bank 0
+000B   1283               M         BCF     STATUS,RP0
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-24-2022  0:26:42         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000C   3005           00088     MOVLW   (1<<GP0) | (1<<GP2)
+Message[305]: Using default destination of 1 (file).
+000D   0485           00089     IORWF   GPIO                    ; set gp0 and gp2
+000E   30FF           00090     MOVLW   ~(1<<GP1) | ~(1<<GP4)
+Message[305]: Using default destination of 1 (file).
+000F   0585           00091     ANDWF   GPIO                    ; clear gp1 and gp4
+0010   0064           00092     CLRWDT                          ; clear watchdog timer
+0011   300C           00093     MOVLW   OFFSET                  ; save offset value of 12
+                      00094                                     ; into TMR0, since 256-244=12
+0012   0081           00095     MOVWF   TMR0                    ; clear timer0
+0013   30A0           00096     MOVLW   (1<<GIE) | (1<<T0IE)    ; enable bits 7 and 5
+0014   008B           00097     MOVWF   INTCON                  ; same as sending H'A0' (B'1010 0000)
+0015   3010           00098     MOVLW   D'16'                   ; total interrupt cycles for a 1 sec delay
+0016   00A0           00099     MOVWF   intCycl                 ; prepare register for decrementing in ISR
+                      00100 ;*******************************************************************************
+                      00101 ;   Main routine
+                      00102 ;*******************************************************************************
+0017                  00103 MAIN
+                      00104    
+0017   2???           00105     GOTO    MAIN                    ; all the logic is in the ISR
+                      00106 ;*******************************************************************************
+                      00107 ;   Interrupt service routine 
+                      00108 ;*******************************************************************************    
+0018                  00109 LED_ISR
+0018   00A1           00110     MOVWF   W_TEMP                  ; Copy W to TEMP register
+0019   0E03           00111     SWAPF   STATUS,W                ; Swap status to be saved into W 
+001A   0183           00112     CLRF    STATUS                  ; bank 0, regardless of current bank, 
+                      00113                                     ;it clears IRP,RP1,RP0
+001B   00A2           00114     MOVWF   STATUS_TEMP             ;Save status to bank zero STATUS_TEMP reg
+                      00115 ;------------------------------------------------------------------------------
+001C   1D0B           00116     BTFSS   INTCON, T0IF            ; check if flag has been set
+001D   2???           00117     GOTO    exitISR                 ; if not, just leave ISR
+001E   110B           00118     BCF     INTCON, T0IF            ; else, clear timer 0 flag
+001F   300C           00119     MOVLW   OFFSET                  ; reload timer0 withe the offset of 12
+0020   0081           00120     MOVWF   TMR0                    ; total interrupt cycles needed = 16
+0021   0BA0           00121     DECFSZ  intCycl, F              ; decrement variable till it is zero
+0022   2???           00122     GOTO    exitISR                 ; and then skip this line to toggle leds
+0023   3017           00123     MOVLW   H'17'                   ; b'00010111' -> gp0, gp1, gp2, gp4
+Message[305]: Using default destination of 1 (file).
+0024   0685           00124     XORWF   GPIO                    ; toggle GPIO state
+0025   3010           00125     MOVLW   D'16'                   ; reload total interrupt cycles value
+0026   00A0           00126     MOVWF   intCycl                 ; 
+                      00127 ;------------------------------------------------------------------------------
+0027                  00128 exitISR    
+                      00129     ; restore context
+0027   0E22           00130     SWAPF   STATUS_TEMP,W           ;Swap STATUS_TEMP register into W 
+                      00131                                     ;(sets bank to original state)
+0028   0083           00132     MOVWF   STATUS                  ;Move W into STATUS register
+0029   0EA1           00133     SWAPF   W_TEMP,F                ;Swap W_TEMP
+002A   0E21           00134     SWAPF   W_TEMP,W                ;Swap W_TEMP into W reg
+                      00135     
+002B   0009           00136     RETFIE                         
+                      00137 ;*******************************************************************************
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-24-2022  0:26:42         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00138 ;   End of PIC program
+                      00139 ;*******************************************************************************    
+3F94                  00140     END
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-24-2022  0:26:42         PAGE  5
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ADCON0                            0000001F
+ADCS0                             00000004
+ADCS1                             00000005
+ADCS2                             00000006
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ANS0                              00000000
+ANS1                              00000001
+ANS2                              00000002
+ANS3                              00000003
+ANSEL                             0000009F
+Bank0                             
+Bank1                             
+C                                 00000000
+CAL0                              00000002
+CAL1                              00000003
+CAL2                              00000004
+CAL3                              00000005
+CAL4                              00000006
+CAL5                              00000007
+CHS0                              00000002
+CHS1                              00000003
+CINV                              00000004
+CIS                               00000003
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             00000019
+CMIE                              00000003
+CMIF                              00000003
+COUT                              00000006
+DC                                00000001
+EEADR                             0000009B
+EECON1                            0000009C
+EECON2                            0000009D
+EEDAT                             0000009A
+EEDATA                            0000009A
+EEIE                              00000007
+EEIF                              00000007
+F                                 00000001
+FSR                               00000004
+GIE                               00000007
+GO                                00000001
+GO_DONE                           00000001
+GO_NOT_DONE                       00000001
+GP0                               00000000
+GP1                               00000001
+GP2                               00000002
+GP3                               00000003
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-24-2022  0:26:42         PAGE  6
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+GP4                               00000004
+GP5                               00000005
+GPIE                              00000003
+GPIF                              00000000
+GPIO                              00000005
+GPIO0                             00000000
+GPIO1                             00000001
+GPIO2                             00000002
+GPIO3                             00000003
+GPIO4                             00000004
+GPIO5                             00000005
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IOC                               00000096
+IOC0                              00000000
+IOC1                              00000001
+IOC2                              00000002
+IOC3                              00000003
+IOC4                              00000004
+IOC5                              00000005
+IOCB                              00000096
+IOCB0                             00000000
+IOCB1                             00000001
+IOCB2                             00000002
+IOCB3                             00000003
+IOCB4                             00000004
+IOCB5                             00000005
+IRP                               00000007
+LED_ISR                           00000018
+MAIN                              00000017
+NOT_BOD                           00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000001
+NOT_GPPU                          00000007
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+OFFSET                            0000000C
+OPTION_REG                        00000081
+OSCCAL                            00000090
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PIE1                              0000008C
+PIR1                              0000000C
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-24-2022  0:26:42         PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PSA                               00000003
+RD                                00000000
+RP0                               00000005
+RP1                               00000006
+START                             00000000
+STATUS                            00000003
+STATUS_TEMP                       00000022
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1IE                              00000000
+T1IF                              00000000
+T1OSCEN                           00000003
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1GE                            00000006
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TRISIO                            00000085
+TRISIO0                           00000000
+TRISIO1                           00000001
+TRISIO2                           00000002
+TRISIO3                           00000003
+TRISIO4                           00000004
+TRISIO5                           00000005
+VCFG                              00000006
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             00000099
+VREN                              00000007
+VRR                               00000005
+W                                 00000000
+WPU                               00000095
+WPU0                              00000000
+WPU1                              00000001
+WPU2                              00000002
+WPU4                              00000004
+WPU5                              00000005
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-24-2022  0:26:42         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+W_TEMP                            00000021
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_OFF                           00003FFF
+_CP_ON                            00003F7F
+_DEVID1                           00002006
+_EC_OSC                           00003FFB
+_EXTRC_OSC_CLKOUT                 00003FFF
+_EXTRC_OSC_NOCLKOUT               00003FFE
+_FOSC_EC                          00003FFB
+_FOSC_EXTRCCLK                    00003FFF
+_FOSC_EXTRCIO                     00003FFE
+_FOSC_HS                          00003FFA
+_FOSC_INTRCCLK                    00003FFD
+_FOSC_INTRCIO                     00003FFC
+_FOSC_LP                          00003FF8
+_FOSC_XT                          00003FF9
+_HS_OSC                           00003FFA
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FF8
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FEF
+_WDTE_OFF                         00003FF7
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FF7
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FF9
+__12F675                          00000001
+exitISR                           00000027
+intCycl                           00000020
+
+Errors   :     0
+Warnings :     2 reported,     0 suppressed
+Messages :     7 reported,     0 suppressed
+
+
