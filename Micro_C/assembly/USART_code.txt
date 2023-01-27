@@ -1,0 +1,215 @@
+
+;---------------------------------------------------------------
+CBLOCK	H'20'
+   rcv_data
+   OLD_W
+   OLD_STATUS	
+ENDC
+
+;---------------------------------------------------------------
+; asynchronous reception setup
+;---------------------------------------------------------------
+BSF	STATUS, RP0	; select bank 1
+			; transmit status and control register
+		     	; high baud rate select bit
+BSF	TXSTA, BRGH  	; async mode, high speed
+BCF	TXSTA, SYNC  	; choose asynchronous operation
+BSF	PIE1, RCIE      ; enable interrupt to detect incoming data
+BSF	INTCON, GIE	; enable global interrupt
+BSF	INTCON, PEIE    ; and also peripheral interrupt for USART
+MOVLW   H'00'
+MOVWF   TRISD		; all portD as output
+			;
+;---------------------------------------------------------------
+BCF	STATUS, RP0	; select bank 0
+			; receive status and control register
+			; spen stands for serial port enable bit
+BSF	RCSTA, SPEN  	; enable the serial port
+BSF	RCSTA, CREN  	; enable data reception
+			; continuous receive enable bit 
+BSF	PORTD, RD0	; turn led on RD0
+			;	
+---------------------------------------------------------------
+BSF	STATUS, RP0	; 
+BSF	STATUS, RP1	; select bank 3
+BSF	BAUDCTL, BRG16  ; set 16 bit baud rate generator bit
+MOVLW	D'103'		; 9600 baud rate, at 16 MHz, 8 bit resolation
+MVWF	SPBRG		; for a 16 BRG16 should be set, the value would be 25
+;--------------------------------------------------------------
+Main:	
+	GOTO 	Main
+;--------------------------------------------------------------
+;  interrupt service routine
+;--------------------------------------------------------------
+USART_ISR:
+
+	; save context
+	MOVWF   OLD_W
+    	BCF    STATUS, RP0             ; access BANK1
+    	SWAPF   STATUS, W
+    	MOVWF   OLD_STATUS
+;-----------------------------------------------
+
+; is an USART RX interrupt? The flag is clear by the MCU
+; read the RCSTA register to get the error flags
+	MOVF	RCREG, W   ; get the 8 least significant data bits
+	MOVWF	rcv_data
+	BTFS    rcv_data
+        GOTO    toggleGreen
+	GOTO    toggleRed
+
+;-----------------------------------------------	
+toggleGreen:
+	MOVLW	H'01'
+	XORWL	PORTD
+	
+toggleRed:
+	MOVLW	H'02'
+	XORWL	PORTD
+
+;-----------------------------------------------	
+	BCF	RCSTA, CREN  	;  if an overrun occurred, clear the OERR flag
+	BSF	RCSTA, CREN  	;  enable data reception again
+
+;-----------------------------------------------	
+	; restore context
+
+	RETFIE
+;--------------------------------------------------------------
+	END
+;--------------------------------------------------------------
+
+unsigned char a[5] = "Test\n";
+unsigned char* word;
+
+void transmit(char a);
+void receive(char a);
+
+void main() 
+{
+    char a;
+    TRISC = 0X80;
+    TXSTA = 0X24;
+    RCSTA = 0X90;
+    SPBRG = (20000000UL / (long)(16UL * 9600)) - 1;
+    while(i < 5)
+    {
+       word = receive(a[i]);
+       transmit(word[i]);
+       i++;	
+    }   
+}
+
+void transmit(char a)
+{
+    TXREG=a;
+    while(TXIF==0);
+    TXIF=0;
+}
+
+void receive(char a)
+{
+    while(RCIF==0)
+    RCIF=0;
+    return RCREG;
+}
+
+----------------------------------------
+USART SEND
+----------------------------------------
+#define WORD_SIZE 19
+//freq = 11059200
+
+volatile unsigned char* msg = "Hello, Intel NUC!\n";
+volatile unsigned char i;
+
+void writeSerial(unsigned char data);
+
+void main(void){
+   configUSART();
+
+   for(i=0; i<WORD_SIZE; i++){
+      writeSerial(msg[i]);
+      __delay_cycles(100);
+   }
+   while(1);
+}
+
+void configUSART(void){
+  TXSTA = 0x20; // enable serial communication, low 8-bit baud rate
+  SPBRG = 17; //9600 baud rate, XTAL = 11.0592 MHz
+  TXSTA = 0x20; //0000 0010, TXSTAbits.TXEN = 1;
+  RCSTA = 0x80; //1000 000, RCSTAbits.SPEN = 1;
+}
+
+void writeSerial(unsigned char data){
+   while(PIR1bits.TXIF==0);
+   TXREG = data;	
+}
+
+/*----------------------------------------
+* USART RECEIVE
+* ----------------------------------------*/
+
+#define LED1    0x01
+#define LED2    0x02
+#define LED3    0x04
+
+unsigned char command;
+typedef void(*func_t)(void);
+
+typedef struct {
+  unsigned char cmd;
+  func_t toggle;
+} action;
+
+void toggleGreenLed(void);
+void toggleRedLed(void);
+
+void configUSART(void);
+void configPORTD(void);
+void blinkLed(void);
+
+action ledControl[] = {
+  {'1', toggleGreenLed}, {'2', toggleRedLed}
+};
+
+void toggleLeds(unsigned char data);
+
+void main(){
+   configUSART();
+   configPORTD();	
+
+   do{
+     blinkLed();
+     command = RCREG;
+     toggleLeds(command);	     
+   } while(1);
+}
+
+void configUSART(void){
+   TXSTA = 0x20;    // enable serial communication, low baud rate
+   SPBRG = 25;      // 9600 baud rate, 8 bit, low speed, XTAL = 16 MHz		
+   RCSTA = 0x90;    // serial port enable, continuous receive mode set 
+}
+
+void configPORTs(void){
+   TRISD = 0x00;    // PORTD as output
+   TRISB = 0x00;    // PORTD as output
+}
+
+void toggleGreenLed(void){ PORTD ^= LED1; }
+void toggleRedLed(void){ PORTD ^= LED2; }
+
+void blinkLed(void){
+   PORTB ^= LED3;
+   Delay_ms(1000);
+}
+
+void toggleLeds(unsigned char data){
+  for(i=0; i<2; i++){
+     if(data == ledControl[i].cmd)
+          ledControl[i].toggle();
+  }   
+}
+

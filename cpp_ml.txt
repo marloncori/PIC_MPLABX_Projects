@@ -1,0 +1,34 @@
+OPTION_REG
+1
+0
+0
+0
+0
+1
+0
+1  0x85
+
+(1:64)
+counter 0xF5
+
+INTCON 0xE0
+1110 0000
+
+https://github.com/mlpack/examples
+
+https://medium.com/syntechx/convolutional-neural-network-cnn-in-c-52c9ed47a6ea
+
+https://github.com/Ricardicus/recurrent-neural-net
+
+https://www.geeksforgeeks.org/ml-neural-network-implementation-in-c-from-scratch/
+
+https://contentlab.io/c-neural-network-in-a-weekend/
+
+https://github.com/mIwav/simple-rnn/tree/master/src
+
+https://github.com/Johnnyboycurtis/NNetRecipes
+
+https://analyticsindiamag.com/implementing-a-recurrent-neural-network-rnn-from-scratch/
+
+https://www.technical-recipes.com/2015/a-genetic-algorithm-for-optimizing-sorting-networks-in-c/
+

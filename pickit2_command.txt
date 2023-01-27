@@ -1,0 +1,2 @@
+I can add this to be run after building in MPLAB IDE
+  $> PICKitCommandline.exe -q -w -p$(Device) -f"$(ImagePath)" -no-verify -mpec

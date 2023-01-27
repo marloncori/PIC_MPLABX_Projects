@@ -1,0 +1,39 @@
+
+; pic16 assembly - algumas instrucoes
+; -----------------------------------------------
+; --------- DECFSZ ----------------------------
+  (desvio eh o mesmo que saltar a proxima 
+    linha e nao realiza-la)
+
+  decrementa f (d = f-1) e desvia se f = 0
+  d = 0 (W) ou d = 1 (F)
+
+;
+; --------- INCFSZ ----------------------------
+
+  incrementa f (d = f-1) e desvia se f = 0
+  d = 0 (W) ou d = 1 (F)
+;
+; ---------- BTFSC ----------------------------
+  testa bit do registrador f e desvia se f = 0
+  d = 0 (W) ou d = 1 (F)
+
+;
+; ---------- BTFSS ----------------------------
+  testa bit do registrador f e desvia se f = 1
+  d = 0 (W) ou d = 1 (F)
+
+; --------------------------------------------
+; ---------- ANDLW ---------------------------
+   realiza a operacao and com o registrador W
+
+; ---------- ANDLF ---------------------------
+   realiza a operacao com um registrador e salva em D.
+
+   andlf  f, d
+; --------------------------------------------
+; ------------ COMF --------------------------
+ faz uma operacao not no registrador e salva em D
+
+; ---------------------------------------------
+; ------------ 

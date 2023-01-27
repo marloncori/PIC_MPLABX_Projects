@@ -1,0 +1,829 @@
+;***********************************************************
+; File name: A2DinLCD.asm
+; Last revision: June 2, 2006
+; Author: Julio Sanchez
+; Processor: 16F877
+;
+; Description:
+; Program to demonstrate use of the Analog to Digital
+; Converter (A/D) module on the 16F877. Program reads the
+; value of a potentionmeter connected to Port-A, line 0
+; and displays resistance in the range 0 to 255 on the
+; attached LCD.
+;
+; WARNING:
+; Code assumes 10Mhz clock. Delay routines must be
+; edited for faster clock. Clock speed is also used to
+; set up the A/D converter clock.
+;
+;===========================
+; 16F877 switches
+580 Chapter 16
+
+;===========================
+; Switches used in __config directive:
+; _CP_ON Code protection ON/OFF
+; * _CP_OFF
+; * _PWRTE_ON Power-up timer ON/OFF
+; _PWRTE_OFF
+; _BODEN_ON Brown-out reset enable ON/OFF
+; * _BODEN_OFF
+; * _PWRTE_ON Power-up timer enable ON/OFF
+; _PWRTE_OFF
+; _WDT_ON Watchdog timer ON/OFF
+; * _WDT_OFF
+; _LPV_ON Low voltage IC programming enable ON/OFF
+; * _LPV_OFF
+; _CPD_ON Data EE memory code protection ON/OFF
+; * _CPD_OFF
+; OSCILLATOR CONFIGURATIONS:
+; _LP_OSC Low power crystal oscillator
+; _XT_OSC External parallel resonator/crystal oscillator
+; * _HS_OSC High speed crystal resonator
+; _RC_OSC Resistor/capacitor oscillator
+; | (simplest, 20% error)
+; |
+; |_____ * indicates setup values presently selected
+processor 16f877 ; Define processor
+#include <p16f877.inc>
+__CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_ON &
+
+_HS_OSC & _WDT_OFF & _LVP_OFF & _CPD_OFF
+; __CONFIG directive is used to embed configuration data
+; within the source file. The labels following the directive
+; are located in the corresponding .inc file.
+
+errorlevel -302
+; Suppress bank-related warning
+;============================================================
+; MACROS
+;============================================================
+; Macros to select the register banks
+Bank0 MACRO ; Select RAM bank 0
+
+bcf STATUS,RP0
+bcf STATUS,RP1
+ENDM
+
+Bank1 MACRO ; Select RAM bank 1
+
+bsf STATUS,RP0
+bcf STATUS,RP1
+Analog to Digital and Realtime Clocks 581
+
+ENDM
+
+Bank2 MACRO ; Select RAM bank 2
+
+bcf STATUS,RP0
+bsf STATUS,RP1
+ENDM
+
+Bank3 MACRO ; Select RAM bank 3
+
+bsf STATUS,RP0
+bsf STATUS,RP1
+ENDM
+;=====================================================
+; constant definitions
+; for PIC-to-LCD pin wiring and LCD line addresses
+;=====================================================
+#define E_line 1 ;|
+#define RS_line 0 ;| — from wiring diagram
+#define RW_line 2 ;|
+; LCD line addresses (from LCD data sheet)
+#define LCD_1 0x80 ; First LCD line constant
+#define LCD_2 0xc0 ; Second LCD line constant
+#define LCDlimit .20; Number of characters per line
+#define spbrgVal .64; For 2400 baud on 10Mhz clock
+; Note: The constants that define the LCD display
+; line addresses have the high-order bit set
+; so as to meet the requirements of controller
+; commands.
+;=====================================================
+; variables in PIC RAM
+;=====================================================
+; Reserve 20 bytes for string buffer
+
+cblock 0x20
+strData
+endc
+
+; Reserve three bytes for ASCII digits
+
+cblock 0x34
+asc100
+asc10
+asc1
+endc
+; Data
+
+cblock 0x37 ; Start of block
+count1 ; Counter # 1
+count2 ; Counter # 2
+count3 ; Counter # 3
+pic_ad
+
+582 Chapter 16
+
+J ; counter J
+K ; counter K
+index
+store1 ; Local storage
+store2
+
+; For LCDscroll procedure
+LCDcount ; Counter for characters per line
+LCDline ; Current display line (0 or 1)
+endc
+
+; Common RAM area for most critical variables
+
+cblock 0x70
+
+; Storage for ASCII decimal conversion and digits
+inNum ; Source operand
+thisDig ; Digit counter
+endc
+
+;============================================================
+; PROGRAM
+;============================================================
+org 0 ; start at address
+goto main
+; Space for interrupt handlers
+org 0x08
+
+main:
+; Wiring:
+; LCD data to Port-D, lines 0 to 7
+; E line -> Port-E, 1
+; RW line -> Port-E, 2
+; RS line -> Port-E, 0
+; Set PORTE D and E for output
+; First, initialize Port-B by clearing latches
+
+clrf STATUS
+clrf PORTB
+
+; Select bank 1 to tris Port-D for output
+Bank1
+; Tris Port-D for output. Port-D lines 4 to 7 are wired
+; to LCD data lines. Port-D lines 0 to 4 are wired to LEDs.
+movlw B’00000000’
+movwf TRISD ; and Port-D
+; By default Port-A lines are analog. To configure them
+; as digital code must set bits 1 and 2 of the ADCON1
+; register (in bank 1)
+movlw 0x06 ; binary 0000 0110 is code to
+; make all Port-A lines
+
+digital
+
+movwf ADCON1
+; Port-B, lines are not used by this application. Init
+Analog to Digital and Realtime Clocks 583
+
+; to output
+movlw b’00000000’
+movwf TRISB
+; Tris Port-E for output. LCD lines are in Port-E
+movwf TRISE ; Tris Port-E
+; Enable Port-B pullups for switches in OPTION register
+; 7 6 5 4 3 2 1 0 <= OPTION bits
+; ||||| |__|__|_____ PS2-PS0 (prescaler bits)
+; ||||| Values for Timer0
+; | | | | | 000 = 1:2 001 = 1:4
+; | | | | | 010 = 1:8 011 = 1:16
+; | | | | | 100 = 1:32 101 = 1:64
+; | | | | | 110 = 1:128 *111 = 1:256
+; |||| |______________ PSA (prescaler assign)
+; | | | | *1 = to WDT
+; | | | | 0 = to Timer0
+; | | | |_________________ TOSE (Timer0 edge select)
+; | | | *0 = increment on low-to-high
+; | | | 1 = increment in high-to-low
+; | | |____________________ TOCS (TMR0 clock source)
+; | | *0 = internal clock
+; | | 1 = RA4/TOCKI bit source
+; | |_______________________ INTEDG (Edge select)
+; | *0 = falling edge
+; |__________________________ RBPU (Pullup enable)
+; *0 = enabled
+; 1 = disabled
+movlw b’00001000’
+movwf OPTION_REG
+; Back to bank 0
+Bank0
+; Clear all output lines
+movlw b’00000000’
+movwf PORTD
+movwf PORTE
+; Wait and initialize HD44780
+
+call delay_5 ; Allow LCD time to initialize
+
+itself
+
+call initLCD ; Then do forced
+
+initialization
+
+call delay_5 ; (Wait probably not
+
+necessary)
+; Clear character counter and line counter variables
+
+clrf LCDcount
+clrf LCDline
+
+; Initialize A/D conversion lines
+
+call InitA2D ; Local procedure
+; Store base address of text buffer in PIC RAM
+584 Chapter 16
+
+movlw 0x20 ; Start address for buffer
+movwf pic_ad ; to local variable
+; Store 20 blanks in PIC RAM, starting at address stored
+; in variable pic_ad
+call blank20
+
+; Call procedure to store ASCII characters for message
+; in text buffer
+movlw d’0’ ; Offset into buffer
+call storeMS1
+;============================
+; read POT digital value
+;============================
+readPOT:
+
+call ReadA2D ; Local procedure
+; w has digital value read from analog line RA0
+; Display result
+
+call bin2asc ; Conversion routine
+; At this point three ASCII digits are stored in local
+; variables. Move digits to display area
+movf asc1,w ; Unit digit
+movwf 0x2e ; Store in buffer
+movf asc10,w ; same with other digits
+movwf 0x2d
+movf asc100,w
+movwf 0x2c
+; Display line
+; Set DDRAM address to start of first line
+showLine:
+
+call line1
+
+; Call procedure to display 16 characters in LCD
+
+call display20
+goto readPOT
+;============================================================
+;============================================================
+; LOCAL PROCEDURES
+;============================================================
+;============================================================
+;==========================
+; init LCD for 4-bit mode
+;==========================
+initLCD:
+; Initialization for Densitron LCD module as follows:
+; 4-bit interface
+; 2 display lines of 20 characters each
+; cursor on
+; left-to-right increment
+; cursor shift right
+Analog to Digital and Realtime Clocks 585
+
+; no display shift
+;=======================|
+; set command mode |
+;=======================|
+bcf PORTE,E_line ; E line low
+bcf PORTE,RS_line ; RS line low
+bcf PORTE,RW_line ; Write mode
+call delay_125 ; delay 125 microseconds
+
+;***********************|
+; FUNCTION SET |
+;***********************|
+movlw 0x28 ;00101000 (FUNCTION SET)
+call send8 ; 4-bit send routine
+; Set 4-bit mode command must be repeated
+movlw 0x28
+call send8
+;***********************|
+; DISPLAY AND CURSOR ON |
+;***********************|
+movlw 0x0e ;00001110 (DISPLAY ON/OFF)
+call send8
+;***********************|
+; set entry mode |
+;***********************|
+movlw 0x06 ;00000110 (ENTRY MODE SET)
+call send8
+;***********************|
+; cursor/display shift |
+;***********************|
+movlw 0x14 ;00010100 (CURSOR/DISPLAY
+
+SHIFT)
+
+call send8
+;***********************|
+; clear display |
+;***********************|
+movlw 0x01 ;00000001 (CLEAR DISPLAY)
+call send8
+; Per documentation
+
+call delay_5 ; Test for busy
+return
+
+;=======================
+; Procedure to delay
+; 125ms. at 10Mhz
+;=======================
+delay_125:
+
+movlw .110 ; Repeat 110 machine cycles
+586 Chapter 16
+
+movwf count1 ; Store value in counter
+
+repeat:
+
+decfsz count1,f ; Decrement counter
+goto repeat ; Continue if not 0
+return ; End of delay
+
+;=======================
+; Procedure to delay
+; 5 milliseconds
+;=======================
+delay_5:
+
+movlw .110 ; Counter = 110
+movwf count2 ; Store in variable
+
+delay:
+
+call delay_125 ; Delay
+decfsz count2,f ; 40 times = 5 milliseconds
+goto delay
+return ; End of delay
+
+;========================
+; pulse E line
+;========================
+pulseE:
+
+bsf PORTE,E_line ; Pulse E line
+nop
+bcf PORTE,E_line
+return
+
+;=============================
+; long delay sub-routine
+;=============================
+long_delay:
+
+movlw .200 ; w delay count
+movwf J ;J=w
+
+jloop:
+
+movwf K ;K=w
+
+kloop:
+
+decfsz K,f ; K = K-1, skip next if zero
+goto kloop
+decfsz J,f ; J = J-1, skip next if zero
+goto jloop
+return
+
+;=============================
+; display buffer on LCD
+;=============================
+; Sends 20 characters from PIC buffer with address stored
+; in variable pic_ad to LCD line previously selected
+display20:
+Analog to Digital and Realtime Clocks 587
+
+call delay_5 ; Make sure not busy
+
+; Set up for data
+bcf PORTA,E_line ; E line low
+bsf PORTA,RS_line ; RS line high for data
+; Set up counter for 20 characters
+movlw D’20’
+movwf count3
+; Get display address from local variable pic_ad
+movf pic_ad,w ; First display RAM address to W
+movwf FSR ; W to FSR
+
+getchar
+
+movf INDF,w ; get character from display RAM
+; location pointed to by file select
+; register
+
+call send8 ; 4-bit interface routine
+
+; Test for 16 characters displayed
+decfsz count3,f ; Decrement counter
+goto nextchar ; Skipped if done
+return
+nextchar:
+
+incf FSR,f ; Bump pointer
+goto getchar
+;========================
+; send 2 nibbles in
+; 4-bit mode
+;========================
+; Procedure to send two 4-bit values to Port-B lines
+; 7, 6, 5, and 4. High-order nibble is sent first
+; ON ENTRY:
+; w register holds 8-bit value to send
+send8:
+
+movwf store1 ; Save original value
+call merge4 ; Merge with Port-B
+
+; Now w has merged byte
+movwf PORTD ; w to Port-D
+call pulseE ; Send data to LCD
+
+; High nibble is sent
+movf store1,w ; Recover byte into w
+swapf store1,w ; Swap nibbles in w
+call merge4
+movwf PORTD
+call pulseE ; Send data to LCD
+call delay_125
+return
+
+;==========================
+; merge bits
+;==========================
+588 Chapter 16
+
+; Routine to merge the 4 high-order bits of the
+; value to send with the contents of Port-B
+; so as to preserve the 4 low-bits in Port-B
+; Logic:
+; AND value with 1111 0000 mask
+; AND Port-B with 0000 1111 mask
+; Now low nibble in value and high nibble in
+; Port-B are all 0 bits:
+; value = vvvv 0000
+; Port-B = 0000 bbbb
+; OR value and Port-B resulting in:
+; vvvv bbbb
+; ON ENTRY:
+; w contain value bits
+; ON EXIT:
+; w contains merged bits
+merge4:
+
+andlw b’11110000’ ; ANDing with 0 clears the
+; bit. ANDing with 1 preserves
+; the original value
+movwf store2 ; Save result in variable
+movf PORTD,w ; Port-B to w register
+andlw b’00001111’ ; Clear high nibble in Port-B
+; and preserve low nibble
+
+iorwf store2,w ; OR two operands in w
+return
+
+;==========================
+; Set address register
+; to LCD line 1
+;==========================
+; ON ENTRY:
+; Address of LCD line 1 in constant LCD_1
+line1:
+
+bcf PORTE,E_line ; E line low
+bcf PORTE,RS_line ; RS line low, set up for
+
+; control
+call delay_5 ; busy?
+
+; Set to second display line
+movlw LCD_1 ; Address and command bit
+call send8 ; 4-bit routine
+
+; Set RS line for data
+bsf PORTE,RS_line ; Setup for data
+call delay_5 ; Busy?
+return
+
+;===============================
+; first text string procedure
+;===============================
+storeMS1:
+Analog to Digital and Realtime Clocks 589
+
+; Procedure to store in PIC RAM buffer the message
+; contained in the code area labeled msg1
+; ON ENTRY:
+; variable pic_ad holds address of text buffer
+; in PIC RAM
+; w register hold offset into storage area
+; msg1 is routine that returns the string characters
+; and a zero terminator
+; index is local variable that hold offset into
+; text table. This variable is also used for
+; temporary storage of offset into buffer
+; ON EXIT:
+; Text message stored in buffer
+;
+; Store offset into text buffer (passed in the w register)
+; in temporary variable
+movwf index ; Store w in index
+; Store base address of text buffer in FSR
+movf pic_ad,w ; first display RAM address to W
+addwf index,w ; Add offset to address
+movwf FSR ; W to FSR
+; Initialize index for text string access
+movlw 0 ; Start at 0
+movwf index ; Store index in variable
+; w still = 0
+get_msg_char:
+
+call msg1 ; Get character from table
+
+; Test for zero terminator
+andlw 0x0ff
+btfsc STATUS,Z ; Test zero flag
+goto endstr1 ; End of string
+; ASSERT: valid string character in w
+; store character in text buffer (by FSR)
+movwf INDF ; store in buffer by FSR
+incf FSR,f ; increment buffer pointer
+
+; Restore table character counter from variable
+movf index,w ; Get value into w
+addlw 1 ; Bump to next character
+movwf index ; Store table index in variable
+goto get_msg_char ; Continue
+
+endstr1:
+return
+
+; Routine for returning message stored in program area
+; Message has 10 characters
+msg1:
+
+addwf PCL,f ; Access table
+retlw ‘P’
+retlw ‘o’
+
+590 Chapter 16
+
+retlw ‘t’
+retlw ‘ ‘
+retlw ‘R’
+retlw ‘e’
+retlw ‘s’
+retlw ‘i’
+retlw ‘s’
+retlw ‘t’
+retlw ‘:’
+retlw 0
+;========================
+; blank buffer
+;========================
+; Procedure to store 20 blank characters in PIC RAM
+; buffer starting at address stored in the variable
+; pic_ad
+blank20:
+
+movlw D’20’ ; Setup counter
+movwf count1
+movf pic_ad,w ; First PIC RAM address
+movwf FSR ; Indexed addressing
+movlw 0x20 ; ASCII space character
+
+storeit:
+
+movwf INDF ; Store blank character in PIC RAM
+; buffer using FSR register
+
+decfsz count1,f ; Done?
+goto incfsr ; no
+return ; yes
+
+incfsr:
+
+incf FSR,f ; Bump FSR to next buffer space
+goto storeit
+;==============================
+; binary to ASCII decimal
+; conversion
+;==============================
+; ON ENTRY:
+; w register has binary value in range 0 to 255
+; ON EXIT:
+; output variables asc100, asc10, and asc1 have
+; three ASCII decimal digits
+; Routine logic:
+; The value 100 is subtracted from the source operand
+; until the remainder is < 0 (carry cleared). The number
+; of subtractions is the decimal hundreds result. 100 is
+; then added back to the subtrahend to compensate
+; for the last subtraction. Now 10 is subtracted in the
+; same manner to determine the decimal tenths result.
+Analog to Digital and Realtime Clocks 591
+
+; The final remainder is the decimal units result.
+; Variables:
+; inNum storage for source operand
+; asc100 storage for hundreds position result
+; asc10 storage for tenth position result
+; asc1 storage for unit position result
+; thisDig Digit counter
+bin2asc:
+
+movwf inNum ; Save copy of source value
+clrf asc100 ; Clear hundreds storage
+clrf asc10 ; Tens
+clrf asc1 ; Units
+clrf thisDig
+
+sub100:
+
+movlw .100
+subwf inNum,f ; Subtract 100
+btfsc STATUS,C ; Did subtract overflow?
+goto bump100 ; No. Count subtraction
+goto end100
+
+bump100:
+
+incf thisDig,f ; Increment digit counter
+goto sub100
+; Store 100th digit
+end100:
+
+movf thisDig,w ; Adjusted digit counter
+addlw 0x30 ; Convert to ASCII
+movwf asc100 ; Store it
+; Calculate tenth position value
+clrf thisDig
+; Adjust minuend
+movlw .100 ; Minuend
+addwf inNum,f ; Add value to minuend to
+; Compensate for last operation
+
+sub10:
+
+movlw .10
+subwf inNum,f ; Subtract 10
+btfsc STATUS,C ; Did subtract overflow?
+goto bump10 ; No. Count subtraction
+goto end10
+
+bump10:
+
+incf thisDig,f ;increment digit counter
+goto sub10
+; Store 10th digit
+end10:
+
+movlw .10
+addwf inNum,f ; Adjust for last subtract
+movf thisDig,w ; get digit counter contents
+addlw 0x30 ; Convert to ASCII
+
+592 Chapter 16
+
+movwf asc10 ; Store it
+; Calculate and store units digit
+movf inNum,w ; Store units value
+addlw 0x30 ; Convert to ASCII
+movwf asc1 ; Store digit
+return
+
+;============================================================
+; Analog to Digital Procedures
+;============================================================
+;============================
+; init A/D module
+;============================
+; 1. Procedure to initialize the A/D module, as follows:
+; Configure the PIC I/O lines. Init analog lines as input
+; 2. Select ports to be used by setting the PCFGx bits in the
+; ADCON1 register. Selects right- or left-justification.
+; 3. Select the analog channels, select the A/D conversion
+; clock, and enable the A/D module.
+; 4. Wait the acquisition time.
+; 5. Initiate the conversion by setting the GO/DONE bit in the
+; ADCON0 register.
+; 6. Wait for the conversion to complete.
+; 7. Read and store the digital result.
+InitA2D:
+
+Bank1 ; Select bank for TRISA register
+movlw b’00000001’
+movwf TRISA ; Set Port-A, line 0, as input
+; Select the format and A/D port configuration bits in
+; the ADCON1 register
+; Format is left-justified so that ADRESH bits are the
+; most significant
+; 0 x x x 1 1 1 0 <== value installed in ADCON1
+; 7 6 5 4 3 2 1 0 <== ADCON1 bits
+; | |__|__|__|____ RA0 is analog.
+; | Vref+ = Vdd
+; | Vref- = Vss
+; |_________________________ 0 = left-justified
+; ADCON1 is in bank 1
+movlw b’00001110’
+movwf ADCON1 ; RA0 is analog. All others ;
+
+; digital
+; Vref+ = Vdd
+; Select D/A options in ADCON0 register
+; For a 10Mhz clock the Fosc32 option produces a conversion
+; speed of 1/(10/32) = 3.2 microseconds, which is within the
+; recommended range of 1.6 to 10 microseconds.
+; 1 0 0 0 0 0 0 1 <== value installed in ADCON0
+Analog to Digital and Realtime Clocks 593
+
+; 7 6 5 4 3 2 1 0 <== ADCON0 bits
+;|||||| |____ A/D function select
+; | | | | | | 1 = A/D ON
+;||||| |__________ A/D status bit
+; | | |__|__|_____________ Analog Channel Select
+; | | 000 = Chanel 0 (RA0)
+; |__|______________________ A/D Clock Select
+; 10 = Fosc/32
+; ADCON0 is in bank 0
+Bank0
+movlw b’10000001’
+movwf ADCON0 ; Channel 0, Fosc/32, A/D
+
+; enabled
+
+; Delay for selection to complete. (Existing routine provides
+; more than 20 microseconds required)
+
+call delayAD ; Local procedure
+return
+
+;============================
+; read A/D line
+;============================
+; Procedure to read the value in the A/D line and convert
+; to digital
+ReadA2D:
+; Initiate conversion
+Bank0 ; Bank for ADCON0 register
+bsf ADCON0,GO ; Set the GO/DONE bit
+; GO/DONE bit is cleared automatically when conversion ends
+convWait:
+
+btfsc ADCON0,GO ; Test bit
+goto convWait ; Wait if not clear
+; At this point conversion has concluded
+; ADRESH register (bank 0) holds 8 MSBs of result
+; ADRESL register (bank 1) holds 4 LSBs.
+; In this application value is left-justified. Only the
+; MSBs are read
+movf ADRESH,W ; Digital value to w register
+return
+
+;=======================
+; delay procedure
+;=======================
+; For a 10Mhz clock the Fosc32 option produces a conversion
+; speed of 1/(10/32) = 3.2 microseconds. At 3.2 ms per bit
+; 13 bits require approximately 41 ms. The instruction time
+; at 10Mhz is 10 ms. 4/10 = 0.4 ms per instruction. To delay
+; 41 ms a 10Mhz PIC must execute 11 instructions. Add one
+; more for safety.
+delayAD:
+
+movlw .12 ; Repeat 12 machine cycles
+594 Chapter 16
+
+movwf count1 ; Store value in counter
+
+repeat11:
+
+decfsz count1,f ; Decrement counter
+goto repeat11 ; Continue if not 0
+return
+
+;============================================================
+
+end ; END OF PROGRAM
+
+;============================================================

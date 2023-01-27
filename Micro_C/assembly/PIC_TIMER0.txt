@@ -1,0 +1,17 @@
+
+for PIC microcontrollers:
+TIMING CALCULATION FOR COUNTER/TIMER0
+
+(4MHz, 8MHz or 16MHz)
+clk_freq / 4 = work_freq
+F = 1/T -> T = 1/F -> T = 1/work_freq
+
+(T * 8bits_max) * prescaler = overflow_time (0.00000xx -> xx us)
+		(1:1, 1:2
+		 1:4, 1:8
+                   ...
+		 1:128)
+
+16 / 4 = 4Mhz
+1/4000000 = 4us
+4us * 256 * 

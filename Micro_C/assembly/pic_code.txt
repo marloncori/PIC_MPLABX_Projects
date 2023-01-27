@@ -1,0 +1,80 @@
+DC MOTOR 10 bit pwm sample for PIC
+--------------------------------------------------------------------
+
+cblock 0x20  ;variaveis
+ workS   ;salva work
+ statusS   ;salva status
+ pwml   ;lsb pwm
+ pwmh   ;msb pwm
+ endc
+ 
+ org 0x0000  ;vetor de reset
+ goto setup  ;desvia para inicio do programa
+ org 0x0004  ;vetor de interrupcao
+ bcf STATUS,RP0 ;seleciona banco de memoria 0
+ movwf  workS  ;salva sfr work
+ swapf  STATUS,W ;salva sfr status
+ movwf  statusS  ;salva sfr status
+ btfss INTCON,T0IF ;testa se teve overflow
+ goto exit_isr ;se nao, sai da interrupcao
+ bcf INTCON,T0IF ;se sim, limpa flag do timer0
+ movlw D'100'  ;reinicia timer0
+ movwf TMR0  ;reinicia timer0
+ btfss s0  ;testa chave 0
+ goto inc_pwml ;se sim, incrementa pwm
+ btfss s1  ;testa chave 1
+ goto dec_pwml ;se sim, decrementa pwm
+ goto exit_isr ;se nao, sai da interrupcao 
+inc_pwml:
+ movlw 0x03  ;mascara para teste de variavel
+ xorwf pwml,W  ;testa se pwml = 3
+ btfsc STATUS,Z ;resultado positivo?
+ goto inc_pwmh ;se sim, incrementa pwmh
+ incf pwml,F  ;se nao, incrementa pwml
+ goto exit_isr ;sai da interrupcao 
+dec_pwml:
+ movlw 0x00  ;mascara para teste de variavel
+ xorwf pwml,W  ;testa se pwml = 0
+ btfsc STATUS,Z ;resultado positivo?
+ goto dec_pwmh ;se sim, decrementa pwmh
+ decf pwml,F  ;se nao, decrementa pwml
+ goto exit_isr ;sai da interrupcao
+inc_pwmh:
+ movlw 0xff  ;mascara para teste de variavel
+ xorwf pwmh,W  ;testa se pwmh = 255
+ btfsc STATUS,Z ;resultado positivo?
+ goto exit_isr ;se sim, sai da interrupcao
+ incf pwmh,F  ;se nao, incrementa pwmh
+ movlw 0x00  ;zera pwml
+ movwf pwml  ;zera pwml
+ goto exit_isr ;sai da interrupcao
+dec_pwmh:
+ movlw 0x00  ;mascara para teste de variavel
+ xorwf pwmh,W  ;testa se pwmh = 0
+ btfsc STATUS,Z ;resultado positivo?
+ goto exit_isr ;se sim, sai da interrupcao
+ decf pwmh,F  ;se nao, decrementa pwmh
+ movlw 0x03  ;reinicia pwml
+ movwf pwml  ;reinicia pwml
+exit_isr:
+ btfsc pwml,0  ;testa bit 0 pwml
+ goto set0  ;se estiver 1 pula o clear do bit
+ bcf CCP1CON,4 ;se estiver 0, reseta bit 0 no gerador de pwm
+ goto no_set0  ;salta o set do bit
+set0:
+ bsf CCP1CON,4 ;se estiver 1, seta bit 0 no gerador de pwm
+no_set0:
+ btfsc pwml,1  ;testa bit 1 pwml
+ goto set1  ;se estiver 1 pula o clear do bit
+ bcf CCP1CON,5 ;se estiver 0, reseta bit 1 no gerador de pwm
+ goto no_set1  ;salta o set do bit
+set1:
+ bsf CCP1CON,5 ;se estiver 1, seta bit 1 no gerador de pwm
+no_set1:
+ movfw pwmh  ;salva modificacao no gerador de pwm
+ movwf CCPR1L  ;salva modificacao no gerador de pwm
+ swapf  statusS,W  ;recupera status
+ movwf  STATUS  ;recupera status
+ swapf  workS,W   ;recupera work 
+ swapf  workS,W    ;recupera work
+ retfie   ;fim da interrupcao

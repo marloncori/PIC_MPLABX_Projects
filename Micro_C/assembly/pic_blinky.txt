@@ -1,0 +1,48 @@
+
+;-----------------------------------------------------
+#define BANK0  bcf STATUS,RP0
+#define BANK1  bsf STATUS,RP0
+
+;-----------------------------------------------------
+cblock   H'20'
+   Dlay:2
+endc
+;-----------------------------------------------------
+org  0
+
+;-----------------------------------------------------
+START
+   nop                     ; for ICD debug
+   clrf    PORTC
+   movlw   H'07'
+   movwf   CMCON0          ; turn of comparators
+   
+   BANK1 
+   clrf    ANSEL ^ 0x80    ; all bits are digital
+   bcf     TRISC ^ 0x80, 0
+   
+   BANK0
+;-----------------------------------------------------
+LOOP
+   clrf    Dlay + 1        ; high 8 bits for delaz
+   clrf    Dlay            ; low 8 bits for delay
+;-----------------------------------------------------
+DlayLoop
+   goto    $ + 1           ; three cycles delay
+   nop
+   movlw   1
+   subwf   Dlay, F
+   btfss   STATUS, Z       ; skip if zero flag is set
+   goto    DlayLoop        ; else go to label
+   decf    Dlay + 1, F     ; decrement high byte until
+   btfss   STATUS, Z       ; it equals zero
+   goto    DlayLoop
+;-----------------------------------------------------
+TOGGLE
+   movlw   1
+   xorwf   PORTC, F
+   goto    Loop
+;-----------------------------------------------------
+
+   END
+;-----------------------------------------------------

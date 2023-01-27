@@ -1,0 +1,610 @@
+; File name: LCDTest2.asm
+; Date: April 16, 2006
+; Author: Julio Sanchez
+; Processor: 16F84A
+;
+; Description:
+; Program to exercises 8-bit PIC-to-LCD interface.
+; Code assumes that LCD is driven by Hitachi HD44780
+; controller and that the display supports two lines
+; each one with 16 characters. The wiring and base
+316 Chapter 13
+
+; address of each display line is stored in #define
+; statements. These statements can be edited to
+; accommodate a different set-up.
+; Program uses the busy flag to synchronize processor
+; access, although delay loops are still required in
+; some cases.
+; Displays: Minnesota State, Mankato
+; WARNING:
+; Code assumes 4Mhz clock. Delay routines must be
+; edited for faster clock
+;
+; Displays: Minnesota State, Mankato
+;
+;===========================
+; switches
+;===========================
+; Switches used in __config directive:
+; _CP_ON Code protection ON/OFF
+; * _CP_OFF
+; * _PWRTE_ON Power-up timer ON/OFF
+; _PWRTE_OFF
+; _WDT_ON Watchdog timer ON/OFF
+; * _WDT_OFF
+; _LP_OSC Low power crystal occilator
+; * _XT_OSC External parallel resonator/crystal oscillator
+; _HS_OSC High speed crystal resonator (8 to 10 MHz)
+; Resonator: Murate Erie CSA8.00MG = 8 MHz
+; _RC_OSC Resistor/capacitor oscillator
+; | (simplest, 20% error)
+; |
+; |_____ * indicates set up values presently selected
+;=========================
+; set up and configuration
+;=========================
+processor 16f84A
+include <p16f84A.inc>
+__config _XT_OSC & _WDT_OFF & _PWRTE_ON & _CP_OFF
+;=====================================================
+; constant definitions
+; for PIC-to-LCD pin wiring and LCD line addresses
+;=====================================================
+#define E_line 1 ;|
+#define RS_line 2 ;| — from wiring diagram
+#define RW_line 3 ;|
+; LCD line addresses (from LCD data sheet)
+LCD Interfacing and Programming 317
+
+#define LCD_1 0x80 ; First LCD line constant
+#define LCD_2 0xc0 ; Second LCD line constant
+; Note: The constants that define the LCD display line
+; addresses have the high-order bit set in
+; order to facilitate the controller command
+;
+;=====================================================
+; variables in PIC RAM
+;=====================================================
+; Reserve 16 bytes for string buffer
+
+cblock 0x0c
+strData
+endc
+
+; Leave 16 bytes and Continue with local variables
+cblock 0x1d ; Start of block
+count1 ; Counter # 1
+count2 ; Counter # 2
+count3 ; Counter # 3
+pic_ad ; Storage for start of text area
+; (labeled strData) in PIC RAM
+
+J ; counter J
+K ; counter K
+index ; Index into text table (also used
+
+; for auxiliary storage)
+
+endc
+
+;=========================================================
+; program
+;=========================================================
+org 0 ; start at address
+goto main
+; Space for interrupt handlers
+org 0x08
+
+main:
+
+movlw b’00000000’ ; All lines to output
+tris PORTA ; in Port-A
+tris PORTB ; and port B
+movlw b’00000000’ ; All outputs ports low
+movwf PORTA
+movwf PORTB
+; Wait and initialize HD44780
+
+call delay_5 ; Allow LCD time to initialize
+
+; itself
+call initLCD ; Then do forced
+
+initialization
+; Store base address of text buffer in PIC RAM
+movlw 0x0c ; Start address for buffer
+318 Chapter 13
+
+movwf pic_ad ; to local variable
+;======================
+; first LCD line
+;======================
+; Store 16 blanks in PIC RAM, starting at address stored
+; in variable pic_ad
+call blank16
+
+; Call procedure to store ASCII characters for message
+; in text buffer
+movlw d’3’ ; Offset into buffer
+call storeMSU
+
+; Set DDRAM address to start of first line
+
+call line1
+
+; Call procedure to display 16 characters in LCD
+
+call display16
+;========================
+; second LCD line
+;========================
+
+call busyTest ; Wait for termination
+call blank16 ; Blank buffer
+; Call procedure to store ASCII characters for message
+; in text buffer
+movlw d’1’ ; Offset into buffer
+call storeUniv
+call line2 ; DDRAM address of LCD line 2
+call display16
+;=======================
+; done!
+;=======================
+loopHere:
+
+goto loopHere ;done
+;************************************************************
+; INITIALIZE LCD PROCEDURE
+;************************************************************
+initLCD:
+;***********************|
+; COMMAND MODE |
+;***********************|
+bcf PORTA,E_line ;E line low
+bcf PORTA,RS_line ;RS line low
+call delay_125 ;delay 125
+
+microseconds
+;***********************|
+; FUNCTION SET |
+;***********************|
+movlw 0x38 ;00111000 (FUNCTION SET)
+; | | | |__ font select:
+
+LCD Interfacing and Programming 319
+
+; | | | 1 = 5x10 in 1/8 or 1/11
+; | | | 0 = 1/16 dc
+; | | |___ Duty cycle select
+; | | 1 = 1/8 or 1/11
+; | | 0 = 1/16
+; | |___ Interface width
+; | 0 = 4 bits
+; | 1 = 8 bits
+; |___ FUNCTION SET COMMAND
+
+movwf PORTB ;0011 1000
+call pulseE ;pulseE and delay
+
+;***********************|
+; DISPLAY OFF |
+;***********************|
+movlw 0x08 ;00001000 (DISPLAY ON/OFF)
+; | | | |___ Blink character
+; | | | 1 = on, 0 = off
+; | | |___ Cursor on/off
+; | | 1 = on, 0 = off
+; | |____ Display on/off
+; | 1 = on, 0 = off
+; |____ COMMAND BIT
+
+movwf PORTB
+call pulseE ;pulseE and delay
+
+;***********************|
+; DISPLAY AND CURSOR ON |
+;***********************|
+movlw 0x0e ;00001110 (DISPLAY ON/OFF)
+; | | | |___ Blink character
+; | | | 1 = on, 0 = off
+; | | |___ Cursor on/off
+; | | 1 = on, 0 = off
+; | |____ Display on/off
+; | 1 = on, 0 = off
+; |____ COMMAND BIT
+
+movwf PORTB
+call pulseE ;pulseE and delay
+
+;***********************|
+; ENTRY MODE SET |
+;***********************|
+movlw 0x06 ;00000110 (ENTRY MODE SET)
+; | | |___ display shift
+; | | 1 = shift
+; | | 0 = no shift
+; | |____ increment mode
+320 Chapter 13
+
+; | 1 = left-to-right
+; | 0 = right-to-left
+; |___ COMMAND BIT
+
+movwf PORTB ;00000110
+call pulseE
+;***********************|
+; CURSOR/DISPLAY SHIFT |
+;***********************|
+movlw 0x14 ;00010100 (CURSOR/DISPLAY
+; ||||| SHIFT)
+; | | | |_|___ don’t care
+; | |_|__ cursor/display shift
+; | 00 = cursor shift left
+; | 01 = cursor shift right
+; | 10 = cursor and display
+; | shifted left
+; | 11 = cursor and display
+; | shifted right
+; |___ COMMAND BIT
+
+movwf PORTB ;0001 1111
+call pulseE
+;***********************|
+; CLEAR DISPLAY |
+;***********************|
+movlw 0x01 ;00000001 (CLEAR DISPLAY)
+; |___ COMMAND BIT
+
+movwf PORTB ;0000 0001
+;
+
+call pulseE
+call busyTest ; Test for busy
+return
+
+;========================
+; busy flag test routine
+;========================
+; Procedure to test the HD44780 busy flag
+; Execution returns when flag is clear
+busyTest:
+
+movlw b’11111111’ ; All lines to input
+tris PORTB ; in port B
+bcf PORTA,RS_line ; RS line low for control
+bsf PORTA,RW_line ; Read mode
+bsf PORTA,E_line ; E line high
+movf PORTB,w ; Read port B into W
+; Port B bit 7 is busy flag
+bcf PORTA,E_line ; E line low
+LCD Interfacing and Programming 321
+
+andlw 0x80 ; Test bit 7, high is busy
+btfss STATUS,Z ; Test zero bit in STATUS
+goto busyTest ; Repeat if set
+; At this point busy flag is clear
+; Reset R/W line and port B to output
+bcf PORTA,RW_line ; Clear R/W line
+movlw b’00000000’ ; All lines to output
+tris PORTB ; in port B
+return
+
+;=======================
+; Procedure to delay
+; 42 microseconds
+;=======================
+delay_125:
+
+movlw D’42’ ; Repeat 42 machine cycles
+movwf count1 ; Store value in counter
+
+repeat:
+
+decfsz count1,f ; Decrement counter
+goto repeat ; Continue if not 0
+return ; End of delay
+
+;=======================
+; Procedure to delay
+; 5 milliseconds
+;=======================
+delay_5:
+
+movlw D’41’ ; Counter = 41
+movwf count2 ; Store in variable
+
+delay:
+
+call delay_125 ; Delay
+decfsz count2,f ; 40 times = 5 milliseconds
+goto delay
+return ; End of delay
+
+;========================
+; pulse E line
+;========================
+pulseE
+
+bsf PORTA,E_line ; Pulse E line
+nop ; Delay
+bcf PORTA,E_line
+call delay_5 ; Wait
+return
+
+;=============================
+; long delay sub-routine
+; (for debugging)
+;=============================
+322 Chapter 13
+
+long_delay
+
+movlw D’200’ ; w = 200 decimal
+movwf J ;J=w
+
+jloop:
+
+movwf K ;K=w
+
+kloop:
+
+decfsz K,f ; K = K-1, skip next if zero
+goto kloop
+decfsz J,f ; J = J-1, skip next if zero
+goto jloop
+return
+
+;=============================
+; LCD display procedure
+;=============================
+; Sends 16 characters from PIC buffer with address stored
+; in variable pic_ad to LCD line previously selected
+display16
+
+call busyTest ; Make sure not busy
+
+; Set up for data
+bcf PORTA,E_line ; E line low
+bsf PORTA,RS_line ; RS line high for data
+; Set up counter for 16 characters
+movlw D’16’ ; Counter = 16
+movwf count3
+; Get display address from local variable pic_ad
+movf pic_ad,w ; First display RAM address to W
+movwf FSR ; W to FSR
+
+getchar
+
+movf INDF,w ; get character from display RAM
+; location pointed to by file select
+; register
+
+movwf PORTB
+call pulseE ;send data to display
+
+; Test for 16 characters displayed
+decfsz count3,f ; Decrement counter
+goto nextchar ; Skipped if done
+return
+nextchar:
+
+incf FSR,f ; Bump pointer
+goto getchar
+;========================
+; blank buffer
+;========================
+; Procedure to store 16 blank characters in PIC RAM
+; buffer starting at address stored in the variable
+; pic_ad
+blank16:
+
+movlw D’16’ ; Set up counter
+LCD Interfacing and Programming 323
+
+movwf count1
+movf pic_ad,w ; First PIC RAM address
+movwf FSR ; Indexed addressing
+movlw 0x20 ; ASCII space character
+
+storeit:
+
+movwf INDF ; Store blank character in PIC
+
+RAM
+
+; buffer using FSR register
+
+decfsz count1,f ; Done?
+goto incfsr ; no
+return ; yes
+incfsr
+incf FSR,f ; Bump FSR to next buffer
+
+; space
+
+goto storeit
+;========================
+; Set Address register
+; to LCD line 1
+;========================
+; ON ENTRY:
+; Address of LCD line 1 in constant LCD_1
+line1:
+
+bcf PORTA,E_line ; E line low
+bcf PORTA,RS_line ; RS line low, set up for
+
+control
+
+call busyTest ; busy?
+; Set to second display line
+movlw LCD_1 ; Address and command bit
+movwf PORTB
+call pulseE ; Pulse and delay
+
+; Set RS line for data
+bsf PORTA,RS_line ; Set up for data
+call busyTest ; Busy?
+return
+
+;========================
+; Set Address register
+; to LCD line 2
+;========================
+; ON ENTRY:
+; Address of LCD line 2 in constant LCD_2
+line2:
+
+bcf PORTA,E_line ; E line low
+bcf PORTA,RS_line ; RS line low, set up for
+
+control
+
+call busyTest ; Busy?
+
+; Set to second display line
+movlw LCD_2 ; Address with high-bit set
+movwf PORTB
+
+324 Chapter 13
+
+call pulseE ; Pulse and delay
+
+; Set RS line for data
+bsf PORTA,RS_line ; RS = 1 for data
+call busyTest ; Busy?
+return
+
+;===============================
+; first text string procedure
+;===============================
+storeMSU:
+; Procedure to store in PIC RAM buffer the message
+; contained in the code area labeled msg1
+; ON ENTRY:
+; variable pic_ad holds address of text buffer
+; in PIC RAM
+; w register hold offset into storage area
+; msg1 is routine that returns the string characters
+; and a zero terminator
+; index is local variable that hold offset into
+; text table. This variable is also used for
+; temporary storage of offset into buffer
+; ON EXIT:
+; Text message stored in buffer
+;
+; Store offset into text buffer (passed in the w register)
+; in temporary variable
+movwf index ; Store w in index
+; Store base address of text buffer in FSR
+movf pic_ad,w ; first display RAM address to W
+addwf index,w ; Add offset to address
+movwf FSR ; W to FSR
+; Initialize index for text string access
+movlw 0 ; Start at 0
+movwf index ; Store index in variable
+; w still = 0
+get_msg_char:
+
+call msg1 ; Get character from table
+
+; Test for zero terminator
+andlw 0x0ff
+btfsc STATUS,Z ; Test zero flag
+goto endstr1 ; End of string
+; ASSERT: valid string character in w
+; store character in text buffer (by FSR)
+movwf INDF ; store in buffer by FSR
+incf FSR,f ; increment buffer pointer
+
+; Restore table character counter from variable
+movf index,w ; Get value into w
+addlw 1 ; Bump to next character
+LCD Interfacing and Programming 325
+
+movwf index ; Store table index in
+
+variable
+
+goto get_msg_char ; Continue
+
+endstr1:
+return
+
+; Routine for returning message stored in program area
+msg1:
+
+addwf PCL,f ; Access table
+retlw ‘M’
+retlw ‘i’
+retlw ‘n’
+retlw ‘n’
+retlw ‘e’
+retlw ‘s’
+retlw ‘o’
+retlw ‘t’
+retlw ‘a’
+retlw 0
+
+;=================================
+; second text string procedure
+;=================================
+storeUniv:
+; Processing identical to procedure StoreMSU
+movwf index ; Store w in index
+; Store base address of text buffer in FSR
+movf pic_ad,0 ; first display RAM address to W
+addwf index,0 ; Add offset to address
+movwf FSR ; W to FSR
+; Initialize index for text string access
+movlw 0 ; Start at 0
+movwf index ; Store index in variable
+; w still = 0
+get_msg_char2:
+
+call msg2 ; Get character from table
+
+; Test for zero terminator
+andlw 0x0ff
+btfsc STATUS,Z ; Test zero flag
+goto endstr2 ; End of string
+; ASSERT: valid string character in w
+; store character in text buffer (by FSR)
+movwf INDF ; Store in buffer by FSR
+incf FSR,f ; Increment buffer pointer
+
+; Restore table character counter from variable
+movf index,w ; Get value into w
+addlw 1 ; Bump to next character
+movwf index ; Store table index in
+
+326 Chapter 13
+
+; variable
+goto get_msg_char2 ; Continue
+
+endstr2:
+return
+
+; Routine for returning message stored in program area
+msg2:
+
+addwf PCL,f ; Access table
+retlw ‘S’
+retlw ‘t’
+retlw ‘a’
+retlw ‘t’
+retlw ‘e’
+retlw ‘,’
+retlw 0x20
+retlw ‘M’
+retlw ‘a’
+retlw ‘n’
+retlw ‘k’
+retlw ‘a’
+retlw ‘t’
+retlw ‘o’
+retlw 0
+
+End
