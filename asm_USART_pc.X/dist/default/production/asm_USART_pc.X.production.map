@@ -1,0 +1,58 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Thu Oct 20 03:39:53 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_0       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x0000d8
+.config_2007_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002007    program   0x000002
+.config_2008_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002008    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x000070      
+                            0x002007    0x002008      
+            114 out of 8455 program addresses used, program memory utilization is 1%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                     Main   0x00002b    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                USART_ISR   0x00002c    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                 blinkLed   0x000050    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                  exitISR   0x000066    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                 frameErr   0x000064    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+              overflowErr   0x000060    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                secondCmd   0x000058    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+              toggleGreen   0x000055    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                toggleRed   0x00005d    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                    usart   0x00003d    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                     Main   0x00002b    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                USART_ISR   0x00002c    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                    usart   0x00003d    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                 blinkLed   0x000050    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+              toggleGreen   0x000055    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                secondCmd   0x000058    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                toggleRed   0x00005d    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+              overflowErr   0x000060    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                 frameErr   0x000064    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+                  exitISR   0x000066    program     static C:\Users\NUC\MPLABXProjects\asm_USART_pc.X\pic_8b_simple.asm
+
+

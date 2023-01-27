@@ -1,0 +1,11 @@
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_DELAY_RB0_EXTI.X\PIC_8B_GENERAL.ASM 47 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_DELAY_RB0_EXTI.X\PIC_8B_GENERAL.ASM 49 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_DELAY_RB0_EXTI.X\PIC_8B_GENERAL.ASM 50 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_DELAY_RB0_EXTI.X\PIC_8B_GENERAL.ASM 65 : Found label after column 1. (LED1_FOR)
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_DELAY_RB0_EXTI.X\PIC_8B_GENERAL.ASM 66 : Using default destination of 1 (file).
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_DELAY_RB0_EXTI.X\PIC_8B_GENERAL.ASM 76 : Found label after column 1. (LED2_FOR)
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_DELAY_RB0_EXTI.X\PIC_8B_GENERAL.ASM 77 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_DELAY_RB0_EXTI.X\PIC_8B_GENERAL.ASM 92 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_DELAY_RB0_EXTI.X\PIC_8B_GENERAL.ASM 95 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_DELAY_RB0_EXTI.X\PIC_8B_GENERAL.ASM 98 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_DELAY_RB0_EXTI.X\PIC_8B_GENERAL.ASM 116 : Using default destination of 1 (file).

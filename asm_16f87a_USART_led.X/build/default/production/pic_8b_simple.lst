@@ -1,0 +1,693 @@
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-21-2022  3:11:49         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;==============================================================
+                      00002 ; Description
+                      00003 ;   Program to send/receive data through USART
+                      00004 ;   A USB-USART fdti convert is wired to RC7/TX and R6/RX pins
+                      00005 ;==============================================================
+                      00006 #include "p16f873a.inc"
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Jul 02 2017
+                      00005 ;  MPASM PIC16F873A processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00527         LIST
+                      00007 
+                      00008 ; CONFIG
+                      00009 ; __config 0xFF3A
+2007   3F3A           00010  __CONFIG _FOSC_HS & _WDTE_OFF & _PWRTE_OFF & _BOREN_OFF & _LVP_OFF & _CPD_OFF & _WRT_OFF & _CP_OFF
+                      00011 
+                      00012 #define TRUE    1
+                      00013 #define FALSE   0 
+                      00014 ;============================================================
+                      00015 ; MACROS
+                      00016 ;============================================================
+                      00017 ; Macros to select the register banks
+                      00018 Bank0   MACRO               ; Select RAM bank 0
+                      00019         BCF     STATUS,RP0
+                      00020         BCF     STATUS,RP1
+                      00021         ENDM
+                      00022 ;----------------------------------------------
+                      00023 Bank1   MACRO               ; Select RAM bank 1
+                      00024         BSF     STATUS,RP0
+                      00025         BCF     STATUS,RP1
+                      00026         ENDM
+                      00027 ;-----------------------------------------------
+                      00028 Bank2   MACRO               ; Select RAM bank 2
+                      00029         BCF     STATUS,RP0
+                      00030         BSF     STATUS,RP1
+                      00031         ENDM
+                      00032 ;----------------------------------------------
+                      00033 Bank3   MACRO               ; Select RAM bank 3
+                      00034         BSF     STATUS,RP0
+                      00035         BSF     STATUS,RP1
+                      00036         ENDM
+                      00037 ;===============================================================================
+                      00038 ; variables in PIC RAM
+                      00039 ;===============================================================================
+                      00040 ; Local variables
+Warning[205]: Found directive in column 1. (CBLOCK)
+                      00041 CBLOCK           H'20'   ; Start of block
+  00000020            00042     rcvFree     
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-21-2022  3:11:49         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+  00000021            00043     rcvData
+  00000022            00044     errFlag
+  00000023            00045     W_TEMP
+  00000024            00046     STATUS_TEMP
+  00000025            00047     PCLATH_TEMP
+Warning[205]: Found directive in column 1. (ENDC)
+                      00048 ENDC
+                      00049 ;===============================================================================
+                      00050 RES_VECT  CODE    H'0000'            ; processor reset vector
+0000   2???           00051     GOTO    START                   ; go to beginning of program
+                      00052 ;===============================================================================
+                      00053 ; add interrupts here if used
+                      00054     ORG     H'0004'
+0004   2???           00055     GOTO    USART_ISR
+                      00056 ;===============================================================================    
+                      00057 ; PROGRAM
+                      00058 ;===============================================================================
+                      00059 MAIN_PROG CODE                      ; let linker place main program
+                      00060 
+                      00061     ;------------------------ TXSTA and RCSTA REG ------------------------------;
+                      00062     ; TXSTA 
+                      00063     ;
+                      00064     ; bt7: CSRC - clock source select bit, Asynchronous mode -> don't care      ;                       
+                                       ;
+                      00065     ; bt6: TX9, 9-bit transmit enable bit                                       ;
+                      00066     ; bit5: TXEN - transmit enable bit, 0: off, 1: on                           ;
+                      00067     ;                                    
+                      00068     ; bit4: SYNC, USART mode select bit, 1: synchronous, 0: async               ;
+                      00069     ; bit3: (unimplemented)                                                     ;
+                      00070     ; bit2: BRGH - 1: high speed, 0:low speed                                  ;
+                      00071     ;   --------> SPBRG value is 25 for 9600 baudrate, 8 bit                    ;
+                      00072     ;                 low speed, 16 MHz or 103 for high speed                   ;               ;
+                      00073     ; bit1: transmit shift register status bit TRMT, 1: TSR empty, 0: TSR full  ;
+                      00074     ; bit0: 9th bit of transmit data, can be parity bit
+                      00075     ;---------------------------------------------------------------------------;
+                      00076     ; RCSTA - received status and control register
+                      00077     ;
+                      00078     ; bt7: SPEN serial port enable, 1: on (RC7/RX/DT and RC6/TX/CK set)                                 
+                             ;
+                      00079     ; bt6: RX9 9-bit receive enable bit, 1: on, 0: 8-bit receive enabled                                
+                                    ;
+                      00080     ; bit5: SREN single receive enable bit (async - don't care)
+                      00081     ; bit4: CREN continuous receive enable bit, 1: ON, 0: off
+                      00082     ; bit3: ADDEN address detect enable bit 
+                      00083     ;      1: enables it, enables interrupt and load of the receive buffer when
+                      00084     ;      RSR<8> is set
+                      00085     ;      0: disables, all bytes are received, 9th bit can be parity bit
+                      00086     ; bit2: FERR, 1: framing error, can be updated by reading RCREG and
+                      00087     ;                  receive next valid bit.                                  ;
+                      00088     ; bit1: OERR, 1: overrun error, can be cleared by clearing bit CREN
+                      00089     ; bit0: RX9D, 9th bit of received data
+                      00090     ;---------------------------------------------------------------------------;
+0000                  00091 START    
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-21-2022  3:11:49         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00092 
+0000   2???           00093     CALL    USART_Init
+                      00094     Bank1                          ; select bank 1  
+0001   1683               M         BSF     STATUS,RP0
+0002   1303               M         BCF     STATUS,RP1
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0003   0186           00095     CLRF    TRISB                  ; set port B pins as output
+0004   30FF           00096     MOVLW   H'FF'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0005   0085           00097     MOVWF   TRISA                  ; input
+                      00098 ;-------------------------------------------------------------------------------    
+                      00099     Bank0                          ; select bank 0
+0006   1283               M         BCF     STATUS,RP0
+0007   1303               M         BCF     STATUS,RP1
+0008   0186           00100     CLRF    PORTB
+0009   3080           00101     MOVLW   (1 << GIE)
+Message[305]: Using default destination of 1 (file).
+000A   048B           00102     IORWF   INTCON                 ; enable global interrupt
+000B   1003           00103     BCF     STATUS, C              ; clear carry bit
+                      00104     
+                      00105 ;*******************************************************************************
+                      00106 ;   Main routine
+                      00107 ;*******************************************************************************
+000C                  00108 Loop
+000C   1820           00109     BTFSC   rcvFree, FALSE          ; check rx buffer flag status
+000D   2???           00110     CALL    RX_Echo                 ; if it is TRUE, invoke this subroutine
+000E   2???           00111     GOTO    Loop
+                      00112 
+                      00113 ;*******************************************************************************
+                      00114 ;   Subroutines
+                      00115 ;*******************************************************************************
+                      00116 ; PIE1 = peripheral interrupt enable registre
+                      00117 ;     bit7 - reserved
+                      00118 ;     bit6 - ADIE: A/D converter interrupt enable       
+                      00119 ;     bit5 RCIE: USART receive interrupt enable
+                      00120 ;     bit4 TXIE: USART transmit interrupt enable
+                      00121 ;     bit3 SSPIE synchronous serial port interrupt enable
+                      00122 ;     bit2 CCP1IE capture control register one interrupt enable
+                      00123 ;     bit1 TMR2IE timer two interrupt enable bit
+                      00124 ;     bit0 TMR1IE timer one interrupt enable bit
+                      00125 ;-------------------------------------------------------------------------------    
+                      00126 ; PIR1 = peripheral interrupt flags register
+                      00127 ;     bit7 - reserved
+                      00128 ;     bit6 ADIF: A/D converter interrupt flag   
+                      00129 ;     bit5 RCIF: USART receive interrupt flag
+                      00130 ;     bit4 TXIF: USART transmit interrupt flag
+                      00131 ;     bit3 SSPIF synchronous serial port interrupt flag
+                      00132 ;     bit2 CCP1IE capture control register one interrupt flag
+                      00133 ;     bit1 TMR2IE timer two interrupt flag
+                      00134 ;     bit0 TMR1IE timer one interrupt flag
+                      00135 ;-------------------------------------------------------------------------------    
+Warning[207]: Found label after column 1. (qafdhgkj415kghoimmbjnfnnshfihrthjhvfjbjkjl)
+Warning[208]: Label truncated at 32 characters. (qafdhgkj415kghoimmbjnfnnshfihrthjhvfjbjkjl)
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-21-2022  3:11:49         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000F                  00136     qafdhgkj415kghoimmbjnfnnshfihrthjhvfjbjkjl
+000F                  00137 USART_Init
+                      00138     Bank1                           ; select bank 1
+000F   1683               M         BSF     STATUS,RP0
+0010   1303               M         BCF     STATUS,RP1
+0011   3019           00139     MOVLW   D'25'                   ; set 9600 baud rate, 8-bit transmit
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0012   0099           00140     MOVWF   SPBRG                   ; low speed, at HS 16 MHz
+0013   30C0           00141     MOVLW   (1<<RC7) | (1<<RC6)     ; set pins 7 and 6 as input
+Message[305]: Using default destination of 1 (file).
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0014   0487           00142     IORWF   TRISC                   ; since they are RX and TX lines.
+0015   3020           00143     MOVLW   (1 << TXEN)
+Message[305]: Using default destination of 1 (file).
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0016   0498           00144     IORWF   TXSTA                   ; set bit 5(transmit enable bit
+0017   3020           00145     MOVLW   (1<<RCIE)               ; bit five will be set
+Message[305]: Using default destination of 1 (file).
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0018   048C           00146     IORWF   PIE1                    ; enable USART receive interrupt
+                      00147     
+                      00148     Bank0
+0019   1283               M         BCF     STATUS,RP0
+001A   1303               M         BCF     STATUS,RP1
+001B   3090           00149     MOVLW   (1<<SPEN) | (1<<CREN)   ; set continous receive mode (bit4)
+Message[305]: Using default destination of 1 (file).
+001C   0498           00150     IORWF   RCSTA                   ; set serial port enable bit (bit7)
+001D   3040           00151     MOVLW   (1<<PEIE)
+Message[305]: Using default destination of 1 (file).
+001E   048B           00152     IORWF   INTCON                  ; set peripheral interrupt enable pin
+001F   0008           00153     RETURN
+                      00154 ;-------------------------------------------------------------------------------
+0020                  00155 TX_Done
+                      00156     Bank1
+0020   1683               M         BSF     STATUS,RP0
+0021   1303               M         BCF     STATUS,RP1
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0022   1898           00157     BTFSC   TXSTA, TRMT             ; check for the transmit status register
+0023   2???           00158     GOTO    TX_Done                 ; bit, if it is full it equal zero
+                      00159     Bank0                                   ; if empty, jump to label, else skip it
+0024   1283               M         BCF     STATUS,RP0
+0025   1303               M         BCF     STATUS,RP1
+0026   0008           00160     RETURN                          ; and go back to main routine
+                      00161 ;-------------------------------------------------------------------------------
+0027                  00162 RX_Echo
+0027   1020           00163     BCF     rcvFree, FALSE          ; clear buffer flag
+0028   0821           00164     MOVF    rcvData, W              ; move received data back to W reg
+0029   0099           00165     MOVWF   TXREG                   ; and copy into the receive register
+002A   2???           00166     CALL    TX_Done                 ; invoke transmit soubroutine
+002B   0086           00167     MOVWF   PORTB                   ; show the received data in hex form
+002C   0008           00168     RETURN
+                      00169 ;*******************************************************************************
+                      00170 ;   interrupt service routine
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-21-2022  3:11:49         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00171 ;*******************************************************************************    
+002D                  00172 USART_ISR 
+                      00173     ; save context--------------------------------------------------------------
+002D   00A3           00174     MOVWF   W_TEMP                  ; Copy W to TEMP register
+002E   0E03           00175     SWAPF   STATUS,W                ; Swap status to be saved into W 
+002F   0183           00176     CLRF    STATUS                  ; bank 0, regardless of current bank, 
+                      00177                                     ; Clears IRP,RP1,RP0
+0030   00A4           00178     MOVWF   STATUS_TEMP             ;Save status to bank zero STATUS_TEMP reg
+0031   080A           00179     MOVF    PCLATH, W               ;Only required if using pages 1, 2 and/or 3
+0032   00A5           00180     MOVWF   PCLATH_TEMP             ;Save PCLATH into W
+0033   018A           00181     CLRF    PCLATH                  ;Page zero, regardless of current page
+                      00182 ;-------------------------------------------------------------------------------
+0034   1E8C           00183     BTFSS   PIR1, RCIF              ; check if receive interrupt enable
+0035   2???           00184     GOTO    ExitISR                 ; is set, if not leave ISR
+0036   128C           00185     BCF     PIR1, RCIF              ; else, continue from here
+0037   1898           00186     BTFSC   RCSTA, OERR             ; Test for overrun error
+0038   2???           00187     GOTO    OverErr                 ; Error handler
+0039   1918           00188     BTFSC   RCSTA,FERR              ; Test for framing error
+003A   2???           00189     GOTO    FrameErr                ; Error handler
+                      00190                                     ; At this point no error was detected
+                      00191                                     ; Received data is in the USART 
+                      00192                                     ; RCREG register
+003B   081A           00193     MOVF    RCREG,W                 ; get received data
+003C   00A1           00194     MOVWF   rcvData                 ; and copy to local variable
+003D   1420           00195     BSF     rcvFree,FALSE           ; buffer is full, not available for new data
+003E   01A2           00196     CLRF    errFlag
+003F   2???           00197     GOTO    ExitISR
+                      00198 ;==========================
+                      00199 ; error handlers
+                      00200 ;==========================
+0040                  00201 OverErr
+0040   1422           00202     bsf     errFlag,0               ; Bit 0 is overrun error
+                      00203                                     ; Reset system
+0041   1218           00204     bcf     RCSTA, CREN             ; Clear continuous receive bit
+0042   1618           00205     bsf     RCSTA, CREN             ; Set to re-enable reception
+0043   0008           00206     return
+                      00207 
+                      00208 ; error because FERR framing error bit is set
+                      00209 ; can do special error handling here 
+                      00210 ; this code simply clears and continues
+0044                  00211 FrameErr
+0044   14A2           00212     bsf     errFlag,1               ; Bit 1 is framing error
+0045   081A           00213     movf    RCREG, W               ; Read and throw away bad data
+0046   0008           00214     return
+                      00215 ;-------------------------------------------------------------------------------    
+0047                  00216 ExitISR    
+                      00217     ; restore context
+0047   0825           00218     MOVF    PCLATH_TEMP, W          ;Restore PCLATH
+0048   008A           00219     MOVWF   PCLATH                  ;Move W into PCLATH
+0049   0E24           00220     SWAPF   STATUS_TEMP,W           ;Swap STATUS_TEMP register into W 
+                      00221                                     ;(sets bank to original state)
+004A   0083           00222     MOVWF   STATUS                  ;Move W into STATUS register
+004B   0EA3           00223     SWAPF   W_TEMP,F                ;Swap W_TEMP
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-21-2022  3:11:49         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+004C   0E23           00224     SWAPF   W_TEMP,W                ;Swap W_TEMP into 
+                      00225     
+004D   0009           00226     RETFIE                                  
+                      00227 ;*******************************************************************************
+                      00228 ;   end of program
+                      00229 ;*******************************************************************************    
+                      00230     
+3F3A                  00231     END
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-21-2022  3:11:49         PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADCS2                             00000006
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BRGH                              00000002
+Bank0                             
+Bank1                             
+Bank2                             
+Bank3                             
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1                             00000015
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2                             0000001B
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+CHS0                              00000003
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-21-2022  3:11:49         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CHS1                              00000004
+CHS2                              00000005
+CIS                               00000003
+CKE                               00000006
+CKP                               00000004
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000009C
+CMIE                              00000006
+CMIF                              00000006
+CREN                              00000004
+CSRC                              00000007
+CVR0                              00000000
+CVR1                              00000001
+CVR2                              00000002
+CVR3                              00000003
+CVRCON                            0000009D
+CVREN                             00000007
+CVROE                             00000006
+CVRR                              00000005
+D                                 00000005
+DATA_ADDRESS                      00000005
+DC                                00000001
+D_A                               00000005
+D_NOT_A                           00000005
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+ExitISR                           00000047
+F                                 00000001
+FALSE                             0
+FERR                              00000002
+FSR                               00000004
+FrameErr                          00000044
+GCEN                              00000007
+GIE                               00000007
+GO                                00000002
+GO_DONE                           00000002
+GO_NOT_DONE                       00000002
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-21-2022  3:11:49         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+Loop                              0000000C
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000002
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+NOT_W                             00000002
+NOT_WRITE                         00000002
+OERR                              00000001
+OPTION_REG                        00000081
+OverErr                           00000040
+P                                 00000004
+PCFG0                             00000000
+PCFG1                             00000001
+PCFG2                             00000002
+PCFG3                             00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCLATH_TEMP                       00000025
+PCON                              0000008E
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PR2                               00000092
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+R                                 00000002
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RB0                               00000000
+RB1                               00000001
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-21-2022  3:11:49         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RC0                               00000000
+RC1                               00000001
+RC2                               00000002
+RC3                               00000003
+RC4                               00000004
+RC5                               00000005
+RC6                               00000006
+RC7                               00000007
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+READ_WRITE                        00000002
+RP0                               00000005
+RP1                               00000006
+RSEN                              00000001
+RX9                               00000006
+RX9D                              00000000
+RX_Echo                           00000027
+R_NOT_W                           00000002
+R_W                               00000002
+S                                 00000003
+SEN                               00000000
+SMP                               00000007
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPOV                             00000006
+SSPSTAT                           00000094
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-21-2022  3:11:49         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+START                             00000000
+STATUS                            00000003
+STATUS_TEMP                       00000024
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1SYNC                            00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISA5                            00000005
+TRISB                             00000086
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+TRISC                             00000087
+TRISC0                            00000000
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-21-2022  3:11:49         PAGE 12
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TRISC1                            00000001
+TRISC2                            00000002
+TRISC3                            00000003
+TRISC4                            00000004
+TRISC5                            00000005
+TRISC6                            00000006
+TRISC7                            00000007
+TRMT                              00000001
+TRUE                              1
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+TX_Done                           00000020
+UA                                00000001
+USART_ISR                         0000002D
+USART_Init                        0000000F
+W                                 00000000
+WCOL                              00000007
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+W_TEMP                            00000023
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_ALL                           00001FFF
+_CP_OFF                           00003FFF
+_CP_ON                            00001FFF
+_DEBUG_OFF                        00003FFF
+_DEBUG_ON                         000037FF
+_DEVID1                           00002006
+_FOSC_EXTRC                       00003FFF
+_FOSC_HS                          00003FFE
+_FOSC_LP                          00003FFC
+_FOSC_XT                          00003FFD
+_HS_OSC                           00003FFE
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_LP_OSC                           00003FFC
+_LVP_OFF                          00003F7F
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-21-2022  3:11:49         PAGE 13
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_LVP_ON                           00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDTE_OFF                         00003FFB
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_WRT_1FOURTH                      00003BFF
+_WRT_256                          00003DFF
+_WRT_HALF                         000039FF
+_WRT_OFF                          00003FFF
+_XT_OSC                           00003FFD
+__16F873A                         00000001
+errFlag                           00000022
+qafdhgkj415kghoimmbjnfnnshfihrth  0000000F
+rcvData                           00000021
+rcvFree                           00000020
+
+Errors   :     0
+Warnings :     4 reported,     0 suppressed
+Messages :    13 reported,     0 suppressed
+
+

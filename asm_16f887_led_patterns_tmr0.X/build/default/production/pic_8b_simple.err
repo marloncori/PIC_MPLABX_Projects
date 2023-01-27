@@ -1,0 +1,6 @@
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F887_LED_PATTERNS_TMR0.X\PIC_8B_SIMPLE.ASM 46 : Found directive in column 1. (CBLOCK)
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F887_LED_PATTERNS_TMR0.X\PIC_8B_SIMPLE.ASM 54 : Found directive in column 1. (ENDC)
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F887_LED_PATTERNS_TMR0.X\PIC_8B_SIMPLE.ASM 83 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F887_LED_PATTERNS_TMR0.X\PIC_8B_SIMPLE.ASM 87 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F887_LED_PATTERNS_TMR0.X\PIC_8B_SIMPLE.ASM 116 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F887_LED_PATTERNS_TMR0.X\PIC_8B_SIMPLE.ASM 179 : Using default destination of 1 (file).

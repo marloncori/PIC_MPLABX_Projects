@@ -1,0 +1,6 @@
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RA4_TMR0_LEDS.X\PIC_8B_GENERAL.ASM 41 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RA4_TMR0_LEDS.X\PIC_8B_GENERAL.ASM 43 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RA4_TMR0_LEDS.X\PIC_8B_GENERAL.ASM 47 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RA4_TMR0_LEDS.X\PIC_8B_GENERAL.ASM 48 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RA4_TMR0_LEDS.X\PIC_8B_GENERAL.ASM 49 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RA4_TMR0_LEDS.X\PIC_8B_GENERAL.ASM 65 : Using default destination of 1 (file).

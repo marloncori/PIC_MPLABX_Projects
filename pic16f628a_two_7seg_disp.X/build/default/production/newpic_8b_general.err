@@ -1,0 +1,7 @@
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\PIC16F628A_TWO_7SEG_DISP.X\NEWPIC_8B_GENERAL.ASM 35 : Found directive in column 1. (CBLOCK)
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\PIC16F628A_TWO_7SEG_DISP.X\NEWPIC_8B_GENERAL.ASM 48 : Found directive in column 1. (ENDC)
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F628A_TWO_7SEG_DISP.X\NEWPIC_8B_GENERAL.ASM 84 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F628A_TWO_7SEG_DISP.X\NEWPIC_8B_GENERAL.ASM 86 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F628A_TWO_7SEG_DISP.X\NEWPIC_8B_GENERAL.ASM 88 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\PIC16F628A_TWO_7SEG_DISP.X\NEWPIC_8B_GENERAL.ASM 188 : Found label after column 1. (DEBOUNCE2)
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\PIC16F628A_TWO_7SEG_DISP.X\NEWPIC_8B_GENERAL.ASM 215 : Found label after column 1. (bank0)

@@ -1,0 +1,5 @@
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\ASM_USART_74HC164_5.X\PIC_8B_SIMPLE.ASM 60 : Found directive in column 1. (CBLOCK)
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\ASM_USART_74HC164_5.X\PIC_8B_SIMPLE.ASM 65 : Found directive in column 1. (ENDC)
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\ASM_USART_74HC164_5.X\PIC_8B_SIMPLE.ASM 74 : Found label after column 1. (ISR)
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_USART_74HC164_5.X\PIC_8B_SIMPLE.ASM 86 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_USART_74HC164_5.X\PIC_8B_SIMPLE.ASM 88 : Register in operand not in bank 0.  Ensure that bank bits are correct.

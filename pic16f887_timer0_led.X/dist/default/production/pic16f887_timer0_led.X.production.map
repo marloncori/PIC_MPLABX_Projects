@@ -1,0 +1,62 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Thu Oct 20 23:11:54 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_0       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x0000aa
+.config_2007_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002007    program   0x000002
+.config_2008_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002008    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x000059      
+                            0x002007    0x002008      
+            91 out of 8455 program addresses used, program memory utilization is 1%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                     LOOP   0x000016    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 PATTERNS   0x00004a    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                   REPEAT   0x000053    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                    TABLE   0x000019    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                   TIMING   0x000051    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+          _MAIN_PROG_0051   0x000056    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 pattern0   0x00001a    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 pattern1   0x000022    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 pattern2   0x00002a    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 pattern3   0x000032    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 pattern4   0x00003a    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 pattern5   0x000042    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                     LOOP   0x000016    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                    TABLE   0x000019    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 pattern0   0x00001a    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 pattern1   0x000022    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 pattern2   0x00002a    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 pattern3   0x000032    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 pattern4   0x00003a    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 pattern5   0x000042    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                 PATTERNS   0x00004a    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                   TIMING   0x000051    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+                   REPEAT   0x000053    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+          _MAIN_PROG_0051   0x000056    program     static C:\Users\NUC\MPLABXProjects\pic16f887_timer0_led.X\pic_8b_general.asm
+
+

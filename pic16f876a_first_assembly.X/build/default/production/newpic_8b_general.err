@@ -1,0 +1,2 @@
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F876A_FIRST_ASSEMBLY.X\NEWPIC_8B_GENERAL.ASM 199 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F876A_FIRST_ASSEMBLY.X\NEWPIC_8B_GENERAL.ASM 201 : Register in operand not in bank 0.  Ensure that bank bits are correct.

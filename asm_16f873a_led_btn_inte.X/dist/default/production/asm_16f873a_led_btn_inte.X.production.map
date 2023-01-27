@@ -1,0 +1,67 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Fri Oct 21 04:19:58 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_0       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x00007c
+.config_2007_BUILD/DEFAULT/PRODUCTION/NEWPIC_       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x000042      
+                            0x002007    0x002007      
+            67 out of 4230 program addresses used, program memory utilization is 1%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+            Btn1_debounce   0x00001a    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+            Btn2_debounce   0x00001d    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+              Delay_100ms   0x000020    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  Inner_b   0x000026    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  Inner_c   0x00002c    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                       L1   0x000016    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                     Loop   0x000015    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  Outer_a   0x000022    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  Outer_b   0x000028    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  Outer_c   0x00002e    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  RB0_ISR   0x000031    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  exitISR   0x00003d    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                   ledOFF   0x00003c    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                    ledON   0x00003a    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                 led_IRQn   0x000034    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                     Loop   0x000015    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                       L1   0x000016    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+            Btn1_debounce   0x00001a    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+            Btn2_debounce   0x00001d    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+              Delay_100ms   0x000020    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  Outer_a   0x000022    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  Inner_b   0x000026    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  Outer_b   0x000028    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  Inner_c   0x00002c    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  Outer_c   0x00002e    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  RB0_ISR   0x000031    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                 led_IRQn   0x000034    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                    ledON   0x00003a    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                   ledOFF   0x00003c    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+                  exitISR   0x00003d    program     static C:\Users\NUC\MPLABXProjects\asm_16f873a_led_btn_inte.X\newpic_8b_simple.asm
+
+

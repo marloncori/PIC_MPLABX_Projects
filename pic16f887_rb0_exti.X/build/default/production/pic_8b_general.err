@@ -1,0 +1,4 @@
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RB0_EXTI.X\PIC_8B_GENERAL.ASM 45 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RB0_EXTI.X\PIC_8B_GENERAL.ASM 47 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RB0_EXTI.X\PIC_8B_GENERAL.ASM 48 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RB0_EXTI.X\PIC_8B_GENERAL.ASM 71 : Using default destination of 1 (file).

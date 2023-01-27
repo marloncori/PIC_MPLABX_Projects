@@ -1,0 +1,8 @@
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LCD.X\PIC_8B_GENERAL.ASM 22 : Found label after column 1. (TIME1)
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LCD.X\PIC_8B_GENERAL.ASM 23 : Found label after column 1. (TIME2)
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LCD.X\PIC_8B_GENERAL.ASM 24 : Found label after column 1. (COUNT)
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LCD.X\PIC_8B_GENERAL.ASM 47 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LCD.X\PIC_8B_GENERAL.ASM 65 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LCD.X\PIC_8B_GENERAL.ASM 77 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LCD.X\PIC_8B_GENERAL.ASM 179 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LCD.X\PIC_8B_GENERAL.ASM 181 : Using default destination of 1 (file).

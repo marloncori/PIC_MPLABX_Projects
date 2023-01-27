@@ -1,0 +1,50 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Tue Oct 04 21:55:58 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_0       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x000068
+.config_2007_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002007    program   0x000002
+.config_2008_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002008    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x000038      
+                            0x002007    0x002008      
+            58 out of 8455 program addresses used, program memory utilization is 0%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                  DISPLAY   0x00000d    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+                    FOR_1   0x00002e    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+                    FOR_2   0x000030    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+                    FOR_3   0x000032    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+                     WAIT   0x00002c    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+          _MAIN_PROG_0006   0x00000b    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+          _MAIN_PROG_0006   0x00000b    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+                  DISPLAY   0x00000d    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+                     WAIT   0x00002c    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+                    FOR_1   0x00002e    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+                    FOR_2   0x000030    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+                    FOR_3   0x000032    program     static C:\Users\NUC\MPLABXProjects\pic16f887_7_seg_display.X\pic_8b_general.asm
+
+

@@ -1,0 +1,55 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Wed Oct 19 21:22:00 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                      ISR       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x000052
+.config_2007_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x00002d      
+                            0x002007    0x002007      
+            46 out of 2182 program addresses used, program memory utilization is 2%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                  EndLoop   0x000019    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+               Ready2Send   0x000013    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+                  bitWait   0x000026    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+                 markWait   0x00002b    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+             readSwitches   0x000016    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+                 sendData   0x00001a    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+                sendEight   0x000022    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+                 startBit   0x00001f    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+               turnOffLed   0x000015    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+               Ready2Send   0x000013    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+               turnOffLed   0x000015    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+             readSwitches   0x000016    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+                  EndLoop   0x000019    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+                 sendData   0x00001a    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+                 startBit   0x00001f    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+                sendEight   0x000022    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+                  bitWait   0x000026    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+                 markWait   0x00002b    program     static C:\Users\NUC\MPLABXProjects\asm_USART_sender.X\pic_8b_general.asm
+
+

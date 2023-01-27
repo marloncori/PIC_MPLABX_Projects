@@ -1,0 +1,2 @@
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F876A_ASM_TOGGLE.X\NEW_PIC_8B_GENERAL.ASM 124 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[202] C:\USERS\NUC\MPLABXPROJECTS\PIC16F876A_ASM_TOGGLE.X\NEW_PIC_8B_GENERAL.ASM 162 : Argument out of range.  Least significant bits used.

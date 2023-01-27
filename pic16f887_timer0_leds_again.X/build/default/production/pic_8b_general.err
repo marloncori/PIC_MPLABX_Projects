@@ -1,0 +1,12 @@
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TIMER0_LEDS_AGAIN.X\PIC_8B_GENERAL.ASM 20 : Found label after column 1. (AUX)
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TIMER0_LEDS_AGAIN.X\PIC_8B_GENERAL.ASM 43 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TIMER0_LEDS_AGAIN.X\PIC_8B_GENERAL.ASM 47 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TIMER0_LEDS_AGAIN.X\PIC_8B_GENERAL.ASM 48 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TIMER0_LEDS_AGAIN.X\PIC_8B_GENERAL.ASM 49 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TIMER0_LEDS_AGAIN.X\PIC_8B_GENERAL.ASM 50 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TIMER0_LEDS_AGAIN.X\PIC_8B_GENERAL.ASM 51 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TIMER0_LEDS_AGAIN.X\PIC_8B_GENERAL.ASM 60 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TIMER0_LEDS_AGAIN.X\PIC_8B_GENERAL.ASM 63 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TIMER0_LEDS_AGAIN.X\PIC_8B_GENERAL.ASM 66 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TIMER0_LEDS_AGAIN.X\PIC_8B_GENERAL.ASM 69 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TIMER0_LEDS_AGAIN.X\PIC_8B_GENERAL.ASM 85 : Using default destination of 1 (file).

@@ -1,0 +1,12 @@
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_WDT_LEDS.X\PIC_8B_GENERAL.ASM 19 : Found label after column 1. (AUX)
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_WDT_LEDS.X\PIC_8B_GENERAL.ASM 20 : Found label after column 1. (COUNT)
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_WDT_LEDS.X\PIC_8B_GENERAL.ASM 21 : Found label after column 1. (TIME)
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_WDT_LEDS.X\PIC_8B_GENERAL.ASM 45 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_WDT_LEDS.X\PIC_8B_GENERAL.ASM 47 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_WDT_LEDS.X\PIC_8B_GENERAL.ASM 49 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_WDT_LEDS.X\PIC_8B_GENERAL.ASM 50 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_WDT_LEDS.X\PIC_8B_GENERAL.ASM 51 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_WDT_LEDS.X\PIC_8B_GENERAL.ASM 80 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_WDT_LEDS.X\PIC_8B_GENERAL.ASM 82 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_WDT_LEDS.X\PIC_8B_GENERAL.ASM 84 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_WDT_LEDS.X\PIC_8B_GENERAL.ASM 87 : Using default destination of 1 (file).

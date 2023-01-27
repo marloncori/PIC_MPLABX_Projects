@@ -1,0 +1,7 @@
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RB_INTERRUPT.X\PIC_8B_GENERAL.ASM 55 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RB_INTERRUPT.X\PIC_8B_GENERAL.ASM 71 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RB_INTERRUPT.X\PIC_8B_GENERAL.ASM 81 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RB_INTERRUPT.X\PIC_8B_GENERAL.ASM 96 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RB_INTERRUPT.X\PIC_8B_GENERAL.ASM 99 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RB_INTERRUPT.X\PIC_8B_GENERAL.ASM 102 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_RB_INTERRUPT.X\PIC_8B_GENERAL.ASM 120 : Using default destination of 1 (file).

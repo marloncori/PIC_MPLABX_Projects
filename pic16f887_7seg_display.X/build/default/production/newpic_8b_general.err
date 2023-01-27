@@ -1,0 +1,4 @@
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_7SEG_DISPLAY.X\NEWPIC_8B_GENERAL.ASM 24 : Found directive in column 1. (CBLOCK)
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_7SEG_DISPLAY.X\NEWPIC_8B_GENERAL.ASM 29 : Found directive in column 1. (ENDC)
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_7SEG_DISPLAY.X\NEWPIC_8B_GENERAL.ASM 58 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_7SEG_DISPLAY.X\NEWPIC_8B_GENERAL.ASM 59 : Register in operand not in bank 0.  Ensure that bank bits are correct.

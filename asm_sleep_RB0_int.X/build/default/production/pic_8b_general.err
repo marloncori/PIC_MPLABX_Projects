@@ -1,0 +1,23 @@
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 53 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 55 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 57 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 58 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 66 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 67 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 72 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 88 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 88 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 90 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 90 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 95 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 95 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 97 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 97 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 116 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 116 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 118 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 118 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 120 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 120 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 122 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_SLEEP_RB0_INT.X\PIC_8B_GENERAL.ASM 122 : Register in operand not in bank 0.  Ensure that bank bits are correct.

@@ -1,0 +1,898 @@
+;******************************************************
+; File name: SerComLCD.asm
+; Last revision: May 14, 2006
+; Author: Julio Sanchez
+; Processor: 16F877
+;
+; Description:
+; 
+; Decode4x4 keypad, display scan code in LCD, and send
+; ASCII character through the serial port. Also receive
+; data through serial port and display on LCD. LCD lines
+; are scrolled by program.
+; Default serial line setting:
+; 2400 baud
+; no parity
+; 1 stop bit
+; 8 character bits
+;
+; Program uses 4-bit PIC-to-LCD interface.
+; Code assumes that LCD is driven by Hitachi HD44780
+; controller and PIC 16F977. Display supports two lines
+; each one with 20 characters. The length, wiring and base
+; address of each display line is stored in #define
+; statements. These statements can be edited to accommodate
+; a different set-up.
+
+; Keypad switch wiring (values are scan codes):
+; ?- KEYPAD ?
+; 0 1 2 3 <= port B0 |
+; 4 5 6 7 <= port B1 |?- ROWS = OUTPUTS
+; 8 9 A B <= port B2 |
+; C D E F <= port B3 |
+; | | | |
+; | | | |_____ port B4 |
+; | | |_________ port B5 |?- COLUMNS = INPUTS
+; | |_____________ port B6 |
+; |_________________ port B7 |
+;
+; Operations:
+; 1. Key press action generates a scan code in the range
+; 0x0 to 0xf.
+; 2. Scan code is converted to an ASCII digit and displayed
+; on the LCD. LCD lines are scrolled as end-of-line is
+; reached.
+; 3. Characters typed on the keypad are also transmitted
+; through the serial port.
+; 4. Serial port is polled for received characters. These
+; are displayed on the LCD.
+;
+; WARNING:
+; Code assumes 4MHz clock (default internal CLK for pic16f887).
+; Delay routines must be
+; edited for faster clock. Clock speed also determines
+; values for baud rate setting (see spbrgVal constant).
+    
+#include "p16f887.inc"
+
+; __config 0xE0E5
+ __CONFIG _CONFIG1, _FOSC_INTRC_CLKOUT & _WDTE_OFF & _PWRTE_ON & _MCLRE_ON & _CP_OFF & _CPD_OFF & _BOREN_OFF & _IESO_OFF & _FCMEN_OFF & _LVP_OFF
+
+; __config 0xFEFF
+ __CONFIG _CONFIG2, _BOR4V_BOR21V & _WRT_OFF
+ 
+; __CONFIG directive is used to embed configuration data
+; within the source file. The labels following the directive
+; are located in the corresponding .inc file.
+;============================================================
+; MACROS
+;============================================================
+; Macros to select the register banks
+ 
+Bank0	MACRO		    ; Select RAM bank 0
+	bcf	STATUS,RP0
+	bcf	STATUS,RP1
+	ENDM
+;----------------------------------------------
+Bank1	MACRO		    ; Select RAM bank 1
+	bsf	STATUS,RP0
+	bcf	STATUS,RP1
+	ENDM
+;-----------------------------------------------
+Bank2	MACRO		    ; Select RAM bank 2
+	bcf	STATUS,RP0
+	bsf	STATUS,RP1
+	ENDM
+;----------------------------------------------
+Bank3	MACRO		    ; Select RAM bank 3
+	bsf	STATUS,RP0
+	bsf	STATUS,RP1
+	ENDM
+
+;=====================================================
+; constant definitions
+; for PIC-to-LCD pin wiring and LCD line addresses
+;=====================================================
+#define E_line	    1 ;|
+#define RS_line	    0 ;| ? from wiring diagram
+#define RW_line	    2 ;|
+	
+; LCD line addresses (from LCD data sheet)
+#define LCD_1	    H'80' ; First LCD line constant
+#define LCD_2	    H'C0' ; Second LCD line constant
+
+#define LCDlimit    .20	    ; Number of characters per line
+#define spbrgVal    .25	    ; For 2400 baud on 4Mhz clock
+
+; Note: The constants that define the LCD display
+; line addresses have the high-order bit set
+; so as to meet the requirements of controller
+; commands.
+;
+;=====================================================
+; variables in PIC RAM
+;=====================================================
+; Local variables
+
+cblock	    H'20'   ; Start of block
+    count1	    ; Counter # 1
+    count2	    ; Counter # 2
+    count3	    ; Counter # 3
+    J		    ; counter J
+    K		    ; counter K
+    store1	    ; Local storage
+    store2
+
+    ; For LCDscroll procedure
+    LCDcount	    ; Counter for characters per line
+    LCDline	    ; Current display line (0 or 1)
+
+    keyMask	    ; For keypad processing
+    rowMask	    ; For masking-off key rows
+    rowCode	    ; Row addend for calculating scan code
+    rowCount	    ; Counter for key rows (0 to 3)
+    scanCode	    ; Final key code
+    newScan	    ; 0 if no new scan code detected
+    ; Communications variables
+    newData ; not 0 if new data received
+    ascVal
+    errorFlags
+endc
+
+;===============================================================================
+RES_VECT  CODE    H'0000'            ; processor reset vector
+    GOTO    START                   ; go to beginning of program
+;===============================================================================
+; add interrupts here if used
+    ORG	    H'0004'
+    RETFIE
+;===============================================================================    
+; PROGRAM
+;===============================================================================
+MAIN_PROG CODE                      ; let linker place main program
+
+START
+; Wiring:
+; LCD data to Port D, lines 0 to 7
+;   E line -> port E, 1
+;   RW line -> port E, 2
+;   RS line -> port E, 0
+
+; Set PORTE D and E for output
+; Data memory bank selection bits:
+;   RP1:RP0	Bank
+;	0:0	0	Ports A,B,C,D, and E
+;	0:1	1	Tris A,B,C,D, and E
+;	1:0	2
+;	1:1	3
+; First, initialize Port-B by clearing latches
+    Bank0
+    clrf    STATUS
+    clrf    PORTB
+
+; Tris Port D for output. Port D lines 4 to 7 are wired
+; to LCD data lines. Port D lines 0 to 4 are wired to LEDs.
+    Bank1
+    movlw   B'00000000'
+    movwf   TRISD		; and Port D
+    
+; By default Port-A lines are analog. To configure them
+; as digital code must set bits 1 and 2 of the ADCON1
+; register (in bank 1)
+    Bank3
+    movlw   H'00'	        ; binary 0000 0000 is code to
+				; make all Port-A lines digital
+    movwf   ANSEL
+    movwf   ANSELH
+; Port-B, lines are wired to keypad switches, as follows:
+; 7 6 5 4 3 2 1 0
+; | | | | |_|_|_|_____ switch rows (output)
+; |_|_|_|_____________ switch columns (input)
+; rows must be defined as output and columns as input
+    Bank1
+    movlw   H'F0'
+    movwf   TRISB
+
+    movlw   H'00'	; Tris port E for output
+    movwf   TRISE	; Tris port E
+; Enable Port-B pullups for switches in OPTION register
+; 7 6 5 4 3 2 1 0  <= OPTION bits
+; | | | | | |__|__|_____ PS2-PS0 (prescaler bits)
+; | | | | |		 Values for Timer0
+; | | | | |		    000 = 1:2 001 = 1:4
+; | | | | |		    010 = 1:8 011 = 1:16
+; | | | | |		    100 = 1:32 101 = 1:64
+; | | | | |		    110 = 1:128 *111 = 1:256
+; | | | | |______________ PSA (prescaler assign)
+; | | | |		     *1 = to WDT
+; | | | |		     0 = to Timer0
+; | | | |_________________ TOSE (Timer0 edge select)
+; | | |			    *0 = increment on low-to-high
+; | | |		             1 = increment in high-to-low
+; | | |____________________ TOCS (TMR0 clock source)
+; | |			    *0 = internal clock
+; | |			    1 = RA4/TOCKI bit source
+; | |_______________________ INTEDG (Edge select)
+; |			     *0 = falling edge
+; |__________________________ NOT_RBPU (POTB pullup enable)
+;			      *0 = enabled
+;				1 = disabled
+    movlw   H'08'		; or F8?
+    movwf   OPTION_REG		; still at Bank1
+
+    Bank0			; Back to bank 0
+    ; Initialize serial port for 9600 baud, 8 bits, no parity
+    ; 1 stop
+    call    InitSerial
+    
+    ; Test serial transmission by sending ?RDY-?
+    movlw   'R'
+    call    SerialSend
+    movlw   'D'
+    call    SerialSend
+    movlw   'Y'
+    call    SerialSend
+    movlw   '-'
+    call    SerialSend
+    movlw   H'20'
+    call    SerialSend
+
+    ; Clear all output lines
+    clrf    PORTD
+    clrf    PORTE
+  
+    ; Wait and initialize HD44780 LCD
+    call    delay_5		; Allow LCD time to initialize itself
+    call    initLCD		; Then do forced initialization
+    call    delay_5		; (Wait probably not necessary)
+    ; Clear character counter and line counter variables
+
+    clrf    LCDcount
+    clrf    LCDline
+
+    ; Set display address to start of second LCD line
+    call    line1
+
+;============================================================
+; scan keypad
+;============================================================
+; Keypad switch wiring:    .......................
+;   x x x x	<= port B0 |
+;   x x x x	<= port B1 |?- ROWS = OUTPUTS
+;   x x x x	<= port B2 |
+;   x x x x	<= port B3 |
+;   | | | |_____   port B4 |.....................
+;   | | |_________  port B5 |?- COLUMNS = INPUTS
+;   | |_____________port B6 |
+;   |_______________port B7 |
+;    
+; Switches are connected to Port-B lines
+; Clear scan code register
+    clrf    scanCode
+    
+;============================
+; scan keypad and display
+;============================
+keyScan:
+; Port-B, lines are wired to pushbutton switches, as follows:
+; 7 6 5 4 3 2 1 0
+; | | | | |_|_|_|_____ switch rows (output)
+; |_|_|_|_____________ switch columns (input)
+;    
+; Keypad processing:
+; switch rows are successively grounded (row = 0)
+; Then column values are tested. If a column returns 0
+; in a 0 row, that switch is down.
+; Initialize row code addend
+
+    clrf    rowCode	     ; First row is code 0
+    clrf    newScan	     ; No new scan code detected
+
+			     ; Initialize row count
+    movlw   D'4'	     ; Four rows
+    movwf   rowCount	     ; Register variable
+    movlw   B'11111110'	     ; All set but LOB
+    movwf   rowMask
+
+keyLoop:
+; Initialize row eliminator mask:
+; The row mask is ANDed with the key mask to successively
+; mask-off each row, for example:
+;
+;            |???- row 3
+;            ||??? row 2
+;            |||??- row 1
+;            ||||?? row 0
+;            vvvv
+;	0000 1111 <= key mask
+; AND	1111 1101 <= mask for row 1
+;	??-
+;       0000 1101 <= row 1 is masked off
+;
+; The row mask, which is initally 1111 1110, is rotated left
+; through the carry in order to mask off the next row
+    movlw   H'0F'		; Mask off all lines
+    movwf   keyMask		; To local register
+				; Set row mask for current row
+    movf    rowMask,w		; Mask to w
+    andwf   keyMask,f		; Update key mask
+    movf    keyMask,w		; Key mask to w
+    movwf   PORTB		; Mask-off Port-B lines
+    
+    ; Read Port-B lines 4 to 7 (columns are input)
+    btfss   PORTB,4
+    call    col0		; Key column procedures
+    btfss   PORTB,5
+    call    col1
+    btfss   PORTB,6
+    call    col2
+    btfss   PORTB,7
+    call    col3
+
+    ; Index to next row by adding 4 to row code
+    movf    rowCode,w		; Code to w
+    addlw   D'4'
+    movwf   rowCode
+    
+;=========================
+; shift row mask
+;=========================
+; Set the carry flag
+    bsf	    STATUS,C
+    rlf	    rowMask,f		    ; Rotate mask bits in storage
+
+;=========================
+; end of keypad?
+;=========================
+; Test for last key row (maximum count is 4)
+    decfsz  rowCount,f		    ; Decrement counter
+    goto    keyLoop
+
+;============================================================
+; display, send, and receive data
+;============================================================
+;============================================================
+; At this point all keys have been tested.
+; Variable newScan = 0 if no new scan code detected, else
+; variable scanCode holds scan code
+    movf    newScan,f		    ; Copy onto intsef (sets Z
+				    ; flag)
+    btfsc   STATUS,Z		    ; Is it zero
+    goto    receive
+				    ; At this point a new scan code is detected
+    movf    scanCode,w		    ; To w
+; If scan code is in the range 0 to 9, that is, a decimal
+; digit, then ASCII conversion consists of adding 0x30.
+; If the scan code represents one of the hex letters
+; (0xa to 0xf) then ASCII conversion requires adding
+; 0x37
+
+    sublw   H'09'		    ; 9 - w
+    ; if w from 0 to 9 then 9 - w = positive (C flag = 1)
+    ; if w = 0xa then 9 - 10 = -1 (C flag = 0)
+    ; if w = 0xc then 9 - 12 = -2 (C flag = 0)
+    btfss   STATUS,C		    ; Test carry flag
+    goto    hexLetter		    ; Carry clear, must be a letter
+    ; At this point scan code is a decimal digit in the
+    ; range 0 to 9. Convert to ASCII by adding 0x30
+    movf    scanCode,w		    ; Recover scan code
+    addlw   H'30'		    ; Convert to ASCII
+    goto    displayDig
+
+hexLetter:
+    movf    scanCode,w		    ; Recover scan code
+    addlw   H'37'		    ; Convert to ASCII
+
+displayDig:
+    movwf   ascVal		    ; Store so it can be sent
+    call    send8		    ; Display routine
+    call    LCDscroll
+    call    long_delay		    ; Debounce
+
+				    ; Recover ASCII
+    movf    ascVal,w
+    call    SerialSend
+    goto    scanExit
+    
+;==========================
+; receive serial data
+;==========================
+receive:
+    call    SerialRcv			; Call serial receive procedure
+					; HOB of newData register is set 
+					; if new data has been received
+    btfss   newData,7
+    goto    scanExit
+					; At this point new data was received
+    call    send8			; Display in LCD
+    call    LCDscroll			; Scroll at end of line
+
+scanExit:
+    goto    keyScan			; Continue
+    
+;==========================
+; calculate scan code
+;==========================
+; The column position is added to the row code (stored
+; in rowCode register). Sum is the scan code
+col0:
+    movf    rowCode,w			; Row code to w
+    addlw   H'00'			; Add 0 (clearly not necessary)
+
+    movwf   scanCode			; Final value
+    incf    newScan,f			; New scan code
+    return
+
+col1:
+    movf    rowCode,w			; Row code to w
+    addlw   H'01'			; Add 1
+    movwf   scanCode
+    incf    newScan,f
+    return
+
+col2:
+    movf    rowCode,w			; Row code to w
+    addlw   H'02'			 ; Add 2
+    movwf   scanCode
+    incf    newScan,f
+    return
+
+col3:
+    movf    rowCode,w			; Row code to w
+    addlw   H'03'			; Add 3
+    movwf   scanCode
+    incf    newScan,f
+    return
+
+;============================================================
+; LOCAL PROCEDURES
+;============================================================
+;==========================
+; init LCD for 4-bit mode
+;==========================
+initLCD:
+; Initialization for Densitron LCD module as follows:
+; 4-bit interface
+; 2 display lines of 16 characters each
+; cursor on
+; left-to-right increment
+; cursor shift right
+; no display shift
+;=======================|
+; set command mode |
+;=======================|
+    bcf	    PORTE,E_line		    ; E line low
+    bcf	    PORTE,RS_line		    ; RS line low
+    bcf	    PORTE,RW_line		    ; Write mode
+    call    delay_125			    ; delay 125 microseconds
+;***********************|
+; FUNCTION SET |
+;***********************|
+    movlw   H'28'				    
+		        ; 0 0 1 0 1 0 0 0 (FUNCTION SET)
+			;     | | | |__ font select:
+			;     | | |		1 = 5x10 in 1/8 or 1/11
+			;     | | |		0 = 1/16 dc
+			;     | | |___ Duty cycle select
+			;     | |	        0 = 1/8 or 1/11
+			;     | |		1 = 1/16
+			;     | |___ Interface width
+			;     |	      0 = 4 bits
+			;     |	      1 = 8 bits
+			;     |___ FUNCTION SET COMMAND
+
+    call    send8	; 4-bit send routine
+    ; Set 4-bit mode command must be repeated
+    movlw   H'28'
+    call    send8
+    
+;***********************|
+; DISPLAY AND CURSOR ON |
+;***********************|
+    movlw   H'0E' 
+; 0 0 0 0 1 1 1 0 (DISPLAY ON/OFF)
+;	  | | | |___ Blink character
+;         | | |        1 = on, 0 = off
+;         | | |___ Cursor on/off
+;         | |          1 = on, 0 = off
+;         | |____ Display on/off
+;         |            1 = on, 0 = off
+;         |____ COMMAND BIT
+    call    send8
+;***********************|
+; set entry mode |
+;***********************|
+    movlw   H'06'
+; 0 0 0 0 0 1 1 0  (ENTRY MODE SET)
+;	    | | |___ display shift
+;	    | |		1 = shift
+;	    | |		 0 = no shift
+;	    | |____ increment mode
+;	    |		1 = left-to-right
+;	    |		0 = right-to-left
+;	    |___ COMMAND BIT
+
+    call    send8
+;***********************|
+; cursor/display shift |
+;***********************|
+    movlw   H'14'   
+; 0 0 0 1 0 1 0 0 (CURSOR/DISPLAY SHIFT)
+;	| | | |_|___ don?t care
+;	| |_|__ cursor/display shift
+;	|	    00 = cursor shift left
+;	|	    01 = cursor shift right
+;	|	    10 = cursor and display
+;	|		 shifted left
+;	|	    11 = cursor and display
+;	|		 shifted right
+;	|___ COMMAND BIT
+    call    send8
+    
+;***********************|
+; clear display |
+;***********************|
+    movlw   H'01' 
+;00000001 (CLEAR DISPLAY)
+;	|___ COMMAND BIT
+    call    send8
+    ; according to datasheet
+    call    delay_5 ; Test for busy
+    return
+
+;=======================
+; Procedure to delay
+; 42 microseconds
+;=======================
+delay_125:
+    movlw   D'42'	    ; Repeat 42 machine cycles
+    movwf   count1	    ; Store value in counter
+
+repeat
+    decfsz  count1,f	    ; Decrement counter
+    goto    repeat	    ; Continue if not 0
+    return		    ; End of delay
+
+;=======================
+; Procedure to delay
+; 5 milliseconds
+;=======================
+delay_5:
+    movlw   D'42'	    ; Counter = 41
+    movwf   count2	    ; Store in variable
+delay
+    call    delay_125	    ; Delay
+    decfsz  count2,f	    ; 40 times = 5 milliseconds
+    goto    delay
+    return		    ; End of delay
+
+;========================
+; pulse E line
+;========================
+pulseE
+    bsf	    PORTE,E_line	; Pulse E line
+    nop
+    bcf	    PORTE,E_line
+    return
+
+;=============================
+; long delay sub-routine
+;=============================
+long_delay:
+    movlw   D'200'		; w delay count
+    movwf   J			;J=w
+jloop
+    movwf   K			;K=w
+kloop
+    decfsz  K,f			; K = K-1, skip next if zero
+    goto    kloop
+    decfsz  J,f			; J = J-1, skip next if zero
+    goto    jloop
+    return
+
+;========================
+; send 2 nibbles in
+; 4-bit mode
+;========================
+; Procedure to send two 4-bit values to Port-B lines
+; 7, 6, 5, and 4. High-order nibble is sent first
+; ON ENTRY:
+; w register holds 8-bit value to send
+send8:
+    movwf   store1			; Save original value
+    call    merge4			; Merge with Port-B
+
+    ; Now w has merged byte
+    movwf   PORTD			; w to Port D
+    call    pulseE			; Send data to LCD
+
+    ; High nibble is sent
+    movf    store1,w			; Recover byte into w
+    swapf   store1,w			; Swap nibbles in w
+    call    merge4
+    movwf   PORTD
+    call    pulseE			; Send data to LCD
+    call    delay_125
+    return
+
+;==========================
+; merge bits
+;==========================
+; Routine to merge the 4 high-order bits of the
+; value to send with the contents of Port-B
+; so as to preserve the 4 low-bits in Port-B
+; Logic:
+;     AND value with 1111 0000 mask
+;    AND Port-B with 0000 1111 mask
+;	Now low nibble in value and high nibble in
+;	Port-B are all 0 bits:
+;	     value = vvvv 0000
+;	      Port-B = 0000 bbbb
+;       OR value and Port-B resulting in:
+;                    vvvv bbbb
+; ON ENTRY:
+;           w contain value bits
+; ON EXIT:
+;           w contains merged bits
+merge4:
+    andlw   H'F0'		    ; ANDing with 0 clears the
+				    ; bit. ANDing with 1 preserves
+				    ; the original value
+    movwf   store2		    ; Save result in variable
+    movf    PORTD,w		    ; Port-B to w register
+    andlw   H'0F'		    ; Clear high nibble in Port-B
+				    ; and preserve low nibble
+    iorwf   store2,w		    ; OR two operands in w
+    return
+
+;==========================
+; Set address register
+; to LCD line 2
+;==========================
+; ON ENTRY:
+; Address of LCD line 2 in constant LCD_2
+line2:
+    bcf	    PORTE,E_line		; E line low
+    bcf	    PORTE,RS_line		; RS line low, setup for control
+    call    delay_5			; Busy?
+
+					; Set to second display line
+    movlw   LCD_2			; Address with high-bit set
+    call    send8
+					; Set RS line for data
+    bsf	    PORTE,RS_line		; RS = 1 for data
+    call    delay_5			; Busy?
+    return
+
+;==========================
+; Set address register
+; to LCD line 1
+;==========================
+; ON ENTRY:
+;   Address of LCD line 1 in constant LCD_1
+line1:
+    bcf	    PORTE,E_line		; E line low
+    bcf	    PORTE,RS_line		; RS line low, set up for control
+    call    delay_5			; busy?
+
+					; Set to second display line
+    movlw   LCD_1			; Address and command bit
+    call    send8			; 4-bit routine
+
+					; Set RS line for data
+    bsf	    PORTE,RS_line		; Setup for data
+    call    delay_5			 ; Busy?
+    return
+
+;==========================
+; scroll to LCD line 2
+;==========================
+; Procedure to count the number of characters displayed on
+; each LCD line. If the number reaches the value in the
+; constant LCDlimit, then display is scrolled to the second
+; LCD line. If at the end of the second line, then LCD is
+; reset to the first line.
+LCDscroll:
+    incf    LCDcount,f		    ; Bump counter
+				    ; Test for line limit
+    movf    LCDcount,w
+    sublw   LCDlimit		    ; Count minus limit
+    btfss   STATUS,Z		    ; Is count - limit = 0
+    goto    scrollExit		    ; Go if not at end of line
+    ; At this point the end of the LCD line was reached
+    ; Test if this is also the end of the second line
+    movf    LCDline,w
+    sublw   H'01'		    ; Is it line 1?
+    btfsc   STATUS,Z		    ; Is LCDline minus 1 = 0?
+    goto    line2End		    ; Go if end of second line
+    ; At this point it is the end of the top LCD line
+    call    line2		    ; Scroll to second line
+    clrf    LCDcount		    ; Reset counter
+    incf    LCDline,f		    ; Bump line counter
+    goto    scrollExit		    ; End of second LCD line
+    
+line2End:
+    call    initLCD		    ; Reset
+    clrf    LCDcount		    ; Clear counters
+    clrf    LCDline
+    call    line1		    ; Display to first line
+
+scrollExit:
+    return
+
+;==============================================================
+; communications procedures
+;==============================================================
+; Initizalize serial port for 2400 baud, 8 bits, no parity,
+; 1 stop
+InitSerial:
+    Bank1			; Macro to select bank1
+    ; Bits 6 and 7 of Port C are multiplexed as TX/CK and RX/DT
+    ; for USART operation. These bits must be set to input in the
+    ; TRISC register
+    movlw   b'11000000'		; Bits for TX and RX
+    iorwf   TRISC, f		; OR into Trisc register
+    ; The asynchronous baud rate is calculated as follows:
+    ;         Fosc
+    ; ABR = ---------
+    ;        S*(x+1)
+    ;                Where: x is value in the SPBRG register 
+    ;                and S is 64 if the high
+    ;                baud rate select bit (BRGH) in the TXSTA control 
+    ;                register is clear, and 16 if the BRGH bit is set. 
+    ;
+    ; For setting to 9600 baud rate, using a 
+    ;  4MHz oscillator at a high-speed baud rate the formula is:
+    ;
+    ;      4,000,000     4,000,000
+    ;     ----------- = ----------- =  9,615 baud (0.16% error)
+    ;       16*(25+1)        416
+    ;
+    ;  At slow speed (BRGH = 0)
+    ;       4,000,000      4,000,000
+    ;      -----------  = ----------- = 2,403.85 (0.16% error)
+    ;       64*(25+1)        1,664
+    ;
+    movlw spbrgVal		; Value in spbrgVal = 25
+    movwf SPBRG			; Place in baud rate generator
+    
+    ; TXSTA (Transmit Status and Control Register) bit map:
+    ; 7 6 5 4 3 2 1 0 <== bits
+    ; | | | | | | | |______ TX9D 9nth data bit on
+    ; | | | | | | |           ? (used for parity)
+    ; | | | | | | |_________ TRMT Transmit Shift Register
+    ; | | | | | |               1 = TSR empty
+    ; | | | | | |               * 0 = TSR full
+    ; | | | | | |____________ BRGH High Speed Baud Rate
+    ; | | | | |                 (Asynchronous mode only)
+    ; | | | | |                 1= high speed (* 4)
+    ; | | | | |                 * 0 = low speed
+    ; | | | | |__________ NOT USED
+    ; | | | |_____________  SYNC USART Mode Select
+    ; | | |                     1 = synchronous mode
+    ; | | |                     * 0 = asynchronous mode
+    ; | | |________________ TXEN Transmit Enable
+    ; | |			* 1 = transmit enabled
+    ; | |			0 = transmit disabled
+    ; | |___________________ TX9 Enable 9-bit Transmit
+    ; |				1 = 9-bit transmission mode
+    ; |				* 0 = 8-bit mode
+    ; |______________________ CSRC Clock Source Select
+    ;				    Not used in asynchronous mode
+    ;				Synchronous mode:
+    ;				     1 = Master Mode (internal clock)
+    ;				    * 0 = Slave mode (external clock)
+    ; Setup value: 0010 0000 = 0x20
+    movlw   H'20'			; Enable transmission and high 
+					; baud rate
+    movwf   TXSTA
+    
+    Bank3
+    bcf	    BAUDCTL, BRG16		; 8 bits resolution
+    
+    Bank0				; select bank 0
+; RCSTA (Receive Status and Control Register) bit map:
+; 7 6 5 4 3 2 1 0 <== bits
+; | | | | | | | |______ RX9D 9th data bit received
+; | | | | | | |		    ? (can be parity bit)
+; | | | | | | |_________ OERR Overrun errror
+; | | | | | |		    ? 1= error (cleared by software)
+; | | | | | |____________ FERR Framing Error
+; | | | | |		    ? 1= error
+; | | | | |_______________ NOT USED
+; | | | |____________ CREN Continuous Receive Enable
+; | | |			    Asynchronous mode:
+; | | |				* 1 = Enable continuous receive
+; | | |				0 = Disables continuous receive
+; | | |			    Synchronous mode:
+; | | |				1 = Enables until CREN cleared
+; | | |		       	        0 = Disables continuous receive
+; | | |_______________ SREN Single Receive Enable
+; | |				? Asynchronous mode = don?t care
+; | |			Synchronous master mode:
+; | |				1 = Enable single receive
+; | |				0 = Disable single receive
+; | |__________________ RX9 9th-bit Receive Enable
+; |				1 = 9-bit reception
+; |				* 0 = 8-bit reception
+; |_____________________ SPEN Serial Port Enable
+;			    * 1 = RX/DT and TX/CK are serial pins
+;			    0 = Serial port disabled
+;    
+; Setup value: 1001 0000 = 0x90
+    movlw   H'90'			; Enable serial port and
+			    		; continuous reception
+    movwf   RCSTA
+    clrf    errorFlags			; Clear local error flags variable
+    return
+
+;==============================
+; transmit data
+;==============================
+; Test for Transmit Register Empty and transmit data in w
+SerialSend:
+    Bank0				; Select bank 0
+    btfss   PIR1,TXIF			; check if transmitter busy
+    goto    $-1				; wait until transmitter is
+					; not busy
+
+    movwf   TXREG			; and transmit the data
+    return
+
+;==============================
+; receive data
+;==============================
+; Procedure to test line for data received and return value
+; in w. Overrun and framing errors are detected and
+; remembered in the variable errorFlags, as follows:
+; 7 6 5 4 3 2 1 0 <== errorFlags
+; ? not used ?? | |___ overrun error
+; |______ framing error
+SerialRcv:
+    clrf    newData			    ; Clear new data received register
+    
+    Bank0				    ; Select bank 0
+    ; Bit 5 (RCIF) of the PIR1 Register is clear if the USART
+    ; receive buffer is empty. If so, no data has been received
+    btfss   PIR1, RCIF			    ; Check for received data
+    return				    ; Exit if no data
+    
+    ; At this point data has been received. First eliminate
+    ; possible errors: overrun and framing.
+    ; Bit 1 (OERR) of the RCSTA register detects overrun
+    ; Bit 2 (FERR) of the RCSTA register detects framing error
+    
+    btfsc   RCSTA, OERR			    ; Test for overrun error
+    goto    OverErr			    ; Error handler
+    btfsc   RCSTA,FERR			    ; Test for framing error
+    goto    FrameErr			    ; Error handler
+					    ; At this point no error was detected
+					    ; Received data is in the USART 
+					    ; RCREG register
+    movf    RCREG,w			    ; get received data
+    bsf	    newData,7		    	    ; Set bit 7 to indicate new data
+					    ; Clear error flags
+    clrf    errorFlags
+    return
+
+;==========================
+; error handlers
+;==========================
+OverErr:
+    bsf errorFlags,0			    ; Bit 0 is overrun error
+					    ; Reset system
+    bcf	    RCSTA, CREN			    ; Clear continuous receive bit
+    bsf	    RCSTA, CREN			    ; Set to re-enable reception
+    return
+
+; error because FERR framing error bit is set
+; can do special error handling here 
+; this code simply clears and continues
+FrameErr:
+    bsf	    errorFlags,1                    ; Bit 1 is framing error
+    movf    RCREG, W                        ; Read and throw away bad data
+    return
+
+;===============================================================================
+    END
+;===============================================================================

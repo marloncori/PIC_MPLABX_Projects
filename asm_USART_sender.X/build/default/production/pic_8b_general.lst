@@ -1,0 +1,536 @@
+MPASM 5.75                PIC_8B_GENERAL.ASM   10-19-2022  21:21:57         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;*******************************************************************************
+                      00002 ;
+                      00003 ; Originally this code was for pic16f84a running at 4MHz. 
+                      00004 ; It sneds data through a single line. 
+                      00005 ;
+                      00006 ; Circuit:
+                      00007 ;   portA RA1 is the serial transmission line
+                      00008 ;   portA RA2  is an active-low push button switch that serves to initiate
+                      00009 ;   communications.
+                      00010 ;
+                      00011 ;   portA RA3  is a Led that is ON when the program is ready to send data.
+                      00012 ;   Once data starts being sent the LED is turned off.
+                      00013 ;    
+                      00014 ;   PORTB, B0-B7 is a 8 x toggle switch that provides the data byte to be
+                      00015 ;   sent. A push button switch is in the 16f84 RESET line
+                      00016 ;
+                      00017 ;   A push button switch is the 16f84a reset line and serves to restart program.
+                      00018 ;    
+                      00019 ;    Communication params:
+                      00020 ;        Timer channel TMR0 is used for synchronizing data transmission.
+                      00021 ;    The timer runs at the maximum rate of 256 cycles per iteration. In a
+                      00022 ;    4 MHz system the rate is 1 MHz, thus the bit rate is 1 Mi/256
+                      00023 ;    which is approximately 3,906 microseconds per bit
+                      00024 ;    
+                      00025 ;*******************************************************************************
+                      00026 #include "p16f628a.inc"
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Jul 02 2017
+                      00005 ;  MPASM PIC16F628A processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00386         LIST
+                      00027 
+                      00028 ;*******************************************************************************
+                      00029 ; __config 0xFF19
+2007   3F19           00030  __CONFIG _FOSC_INTOSCCLK & _WDTE_OFF & _PWRTE_OFF & _MCLRE_OFF & _BOREN_OFF & _LVP_OFF & _CPD_OFF & _CP
+                            _OFF
+                      00031 
+                      00032 ;*******************************************************************************
+                      00033 Bank0   MACRO                           ; select RAM bank 0
+                      00034         bcf     STATUS, RP0
+                      00035         ENDM
+                      00036 ;------------------------------------------------------------
+                      00037 Bank1   MACRO                           ; select RAM bank 1
+                      00038         bsf     STATUS, RP0
+                      00039         ENDM    
+                      00040 ;*******************************************************************************
+                      00041 ; Constant definitions for pin wiring
+                      00042 ;*******************************************************************************
+MPASM 5.75                PIC_8B_GENERAL.ASM   10-19-2022  21:21:57         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00043 #define readySW     2
+                      00044 #define readyLED    3
+                      00045 #define serialLN    1   
+                      00046         
+                      00047 ;*******************************************************************************
+                      00048 ; PIC register flag equates
+                      00049 ;*******************************************************************************
+  00000000            00050 c_flag      EQU     0                   ; Carry flag ("vai um")
+  00000002            00051 tmr0_overf  EQU     T0IF                ; timer overflow bit
+                      00052             
+                      00053 ;*******************************************************************************
+                      00054 ; Variables defined in PIC RAM
+                      00055 ;*******************************************************************************
+Warning[205]: Found directive in column 1. (CBLOCK)
+                      00056 CBLOCK      H'20'
+  00000020            00057    bitCount                             ; a counter for eight bits
+  00000021            00058    dataReg                             ; data to be sent through USART
+Warning[205]: Found directive in column 1. (ENDC)
+                      00059 ENDC        
+                      00060 ;*******************************************************************************
+                      00061 ; Reset Vector
+                      00062 ;*******************************************************************************
+                      00063 RES_VECT  CODE    0x0000            ; processor reset vector
+0000   2???           00064     GOTO    START                   ; go to beginning of program
+                      00065 
+                      00066 ;*******************************************************************************
+                      00067 ; INSERT ISR HERE
+Warning[207]: Found label after column 1. (ISR)
+                      00068      ISR     CODE    0x0004           ; interrupt vector location
+0004   0009           00069      RETFIE   
+                      00070 ;*******************************************************************************
+                      00071 ; MAIN PROGRAM
+                      00072 ;*******************************************************************************
+                      00073 
+                      00074 MAIN_PROG CODE                      ; let linker place main program
+                      00075 
+0000                  00076 START
+                      00077 
+                      00078     Bank1
+0000   1683               M         bsf     STATUS, RP0
+0001   3004           00079     MOVLW   H'04'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0002   0085           00080     MOVWF   TRISA                   ; PORTA, RA2 is input, rest is output
+0003   3004           00081     MOVLW   H'04'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0004   0086           00082     MOVWF   TRISB                   ; PORTB as input
+                      00083     
+                      00084     Bank0
+0005   1283               M         bcf     STATUS, RP0
+0006   1485           00085     BSF     PORTA, 1                ; marking bit
+0007   0181           00086     CLRF    TMR0                    ; prepare to set prescale
+0008   0064           00087     CLRWDT
+                      00088     
+MPASM 5.75                PIC_8B_GENERAL.ASM   10-19-2022  21:21:57         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00089     ;----------------------------------------------------
+                      00090     ; set up option_reg register for full timer speed
+                      00091     ; NOT_RBPU: pullups -> 1, disabled
+                      00092     ; INTEDG: 1, raising edge
+                      00093     ; T0CS: timer zero clock source -> 0, internal clock
+                      00094     ; T0SE: timer zero edge select -> 1, inc for hi-to-lo
+                      00095     ; PSA: prescaler assign, 1: to WDT
+                      00096     ; 0  0  0 -> 1:2 prescaler, value: b'11011000'
+0009   30D8           00097     MOVLW   H'D8'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000A   0081           00098     MOVWF   OPTION_REG
+                      00099     
+000B   128B           00100     BCF     INTCON, T0IE            ; timer0 overflow interrupt enable OFF
+000C   138B           00101     BCF     INTCON, GIE             ; global interrup disabled
+000D   1585           00102     BSF     PORTA, RA3              ; LED is on
+                      00103     
+                      00104 ;*******************************************************************************
+                      00105 ;  Wait for ready switch to be pressed
+                      00106 ;*******************************************************************************
+000E                  00107 Ready2Send
+000E   1905           00108     BTFSC   PORTA, readySW
+000F   2???           00109     GOTO    Ready2Send
+                      00110     
+                      00111 ;***********************;
+                      00112 ;    send serial DATA   ; 
+                      00113 ;***********************;
+0010                  00114 turnOffLed                      ; at this point program proceeds to send
+0010   1185           00115     BCF     PORTA, readyLED     ; data through the serial port line
+                      00116     
+0011                  00117 readSwitches
+0011   0806           00118     MOVF    PORTB, W
+0012   00A1           00119     MOVWF   dataReg
+                      00120     
+                      00121 ;*****************************;
+                      00122 ; call serial output procdure ;
+                      00123 ;*****************************;
+0013   2???           00124     CALL    sendData
+                      00125 
+                      00126 ;***************;
+                      00127 ;  wait forever ;
+                      00128 ;***************;
+0014                  00129 EndLoop
+0014   2???           00130     GOTO    EndLoop
+                      00131 
+                      00132 ;*******************************************************************************
+                      00133 ;  SUBROUTINES to deal with serial data
+                      00134 ;*******************************************************************************
+                      00135 ; ON ENTRY:
+                      00136 ;       local variable dataReg holds 8-bit value to be transmitted through
+                      00137 ;       port labeled serialLN
+                      00138 ;
+                      00139 ; OPERATION:
+                      00140 ;     1. the timer at register TMR0 is set to run at max clock speed, that is
+MPASM 5.75                PIC_8B_GENERAL.ASM   10-19-2022  21:21:57         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00141 ;         to say: 256 clock beats. The timer overflow flag in the INTCON register
+                      00142 ;`        is set when the timer cycles from 0xFF to 0x00
+                      00143 ;     2. each bit (start, data and stop bits) is sent at a rate of 256 timer
+                      00144 ;         beats. That is, each bit is held high or low one full timer cycle 
+                      00145 ;        (256 clock beats)
+                      00146 ;     3. the procdure tests the timer overflow flag (tmr_ovf) to determine when
+                      00147 ;        the timer cycle has ended, that is when 256 clock beats have passed
+                      00148 ; ------------------------------------------------------------------------------
+0015                  00149 sendData
+0015   3008           00150     MOVLW   H'08'                   ; setup shift countre
+0016   00A0           00151     MOVWF   bitCount
+                      00152 
+                      00153 ;******************;
+                      00154 ;  send start bit  ;
+                      00155 ;******************;
+0017   1085           00156     BCF     PORTA, serialLN         ; set line low then hold for 256
+                      00157                                     ; timer clock beats
+0018   0181           00158     CLRF    TMR0                    ; reset timer counter
+0019   110B           00159     BCF     INTCON, tmr0_overf      ; reset T0IF, timer0 overflow interrupt flag
+                      00160     
+001A                  00161 startBit
+001A   1D0B           00162     BTFSS   INTCON, tmr0_overf      ; timer 0 overflow?
+001B   2???           00163     GOTO    startBit                ; wait until it is set
+                      00164                                     ; at this point timer has cycled
+001C   110B           00165     BCF     INTCON, tmr0_overf      ; Start bit has ended.
+                      00166     
+                      00167 ;*********************;
+                      00168 ;  send 8 data bits   ;
+                      00169 ;*********************;----------------------------------------------------;
+                      00170 ;  The bits are rotated left to the carry flag. Code assumes the bit       ; 
+                      00171 ;   is zero and sets the serial line low. Then the carry flag is tested.   ;
+                      00172 ;  If the carry is set the serial line is changed to high. The line is kept;
+                      00173 ;   low or high for 256 timer beats                                        ; 
+                      00174 ;--------------------------------------------------------------------------;
+001D                  00175 sendEight
+001D   0DA1           00176     RLF     dataReg, F              ; bit stored into carry flag
+001E   1085           00177     BCF     PORTA, serialLN         ; send 0 to serial line
+                      00178 
+                      00179 ;*********************;----------------------------------------------------;
+                      00180 ;  It is assumed the bit is a zero and set the line low since, if low is   ; 
+                      00181 ;   the wrong state, it will only remainf for two timer beats. The receiver;
+                      00182 ;   will not check the line for data until 128 timer beats have elapsed, so;
+                      00183 ;   the error will be harmless. In any case, there is no assurance that the;
+                      00184 ;   previous line state is the correct one, so leaving the line in its     ;
+                      00185 ;   previous state could also be wrong.                                    ; 
+                      00186 ;--------------------------------------------------------------------------;
+001F   1803           00187     BTFSC   STATUS, c_flag          ; test carry flag
+0020   1485           00188     BSF     PORTA, serialLN         ; bit is set, fix error.
+                      00189     
+0021                  00190 bitWait
+0021   1D0B           00191     BTFSS   INTCON, tmr0_overf      ; timer cycled?
+0022   2???           00192     GOTO    bitWait                 ; not yet
+                      00193     
+MPASM 5.75                PIC_8B_GENERAL.ASM   10-19-2022  21:21:57         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0023   110B           00194     BCF     INTCON, tmr0_overf      ; timer has cycled
+0024   0BA0           00195     DECFSZ  bitCount, F             ; test for end of byte, if not
+                      00196                                     ; so send next bit
+0025   2???           00197     GOTO    sendEight               ; repeat it if last bit not reached
+                      00198     
+                      00199 ;*********************;
+                      00200 ;  hold marking state ;
+                      00201 ;*********************;------------------------------------------------;    
+                      00202 ; all 8 data bits have been set, the serial line must now be held high ;
+                      00203 ; (MARKING) for one clock cycle                                        ;      
+                      00204 ;----------------------------------------------------------------------;
+0026                  00205 markWait
+0026   1D0B           00206     BTFSS   INTCON, tmr0_overf      ; Done?
+0027   2???           00207     GOTO    markWait                ; not yet
+                      00208     
+                      00209 ;*********************;
+                      00210 ;  end of tansmission ;
+                      00211 ;*********************;    
+0028   0008           00212     RETURN                          ; done.
+                      00213     
+                      00214 ;*******************************************************************************
+3F19                  00215     END
+MPASM 5.75                PIC_8B_GENERAL.ASM   10-19-2022  21:21:57         PAGE  6
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ADDEN                             00000003
+ADEN                              00000003
+BRGH                              00000002
+Bank0                             
+Bank1                             
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCPR1                             00000015
+CCPR1H                            00000016
+CCPR1L                            00000015
+CIS                               00000003
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000001F
+CMIE                              00000006
+CMIF                              00000006
+CREN                              00000004
+CSRC                              00000007
+DATA_CP_OFF                       00003FFF
+DATA_CP_ON                        00003EFF
+DC                                00000001
+EEADR                             0000009B
+EECON1                            0000009C
+EECON2                            0000009D
+EEDATA                            0000009A
+EEIE                              00000007
+EEIF                              00000007
+EndLoop                           00000014
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+GIE                               00000007
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+NOT_BO                            00000000
+NOT_BOD                           00000000
+MPASM 5.75                PIC_8B_GENERAL.ASM   10-19-2022  21:21:57         PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+NOT_BOR                           00000000
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+OERR                              00000001
+OPTION_REG                        00000081
+OSCF                              00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PIE1                              0000008C
+PIR1                              0000000C
+PORTA                             00000005
+PORTB                             00000006
+PR2                               00000092
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RA6                               00000006
+RA7                               00000007
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+RP0                               00000005
+RP1                               00000006
+RX9                               00000006
+RX9D                              00000000
+Ready2Send                        0000000E
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+MPASM 5.75                PIC_8B_GENERAL.ASM   10-19-2022  21:21:57         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+START                             00000000
+STATUS                            00000003
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1OSCEN                           00000003
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISA5                            00000005
+TRISA6                            00000006
+TRISA7                            00000007
+TRISB                             00000086
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+TRMT                              00000001
+TX9                               00000006
+TX9D                              00000000
+MPASM 5.75                PIC_8B_GENERAL.ASM   10-19-2022  21:21:57         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             0000009F
+VREN                              00000007
+VROE                              00000006
+VRR                               00000005
+W                                 00000000
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_OFF                           00003FFF
+_CP_ON                            00001FFF
+_DEVID1                           00002006
+_ER_OSC_CLKOUT                    00003FFF
+_ER_OSC_NOCLKOUT                  00003FFE
+_EXTCLK_OSC                       00003FEF
+_FOSC_ECIO                        00003FEF
+_FOSC_EXTRCCLK                    00003FFF
+_FOSC_EXTRCIO                     00003FFE
+_FOSC_HS                          00003FEE
+_FOSC_INTOSCCLK                   00003FFD
+_FOSC_INTOSCIO                    00003FFC
+_FOSC_LP                          00003FEC
+_FOSC_XT                          00003FED
+_HS_OSC                           00003FEE
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_INTOSC_OSC_CLKOUT                00003FFD
+_INTOSC_OSC_NOCLKOUT              00003FFC
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FEC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+MPASM 5.75                PIC_8B_GENERAL.ASM   10-19-2022  21:21:57         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC_CLKOUT                    00003FFF
+_RC_OSC_NOCLKOUT                  00003FFE
+_WDTE_OFF                         00003FFB
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FED
+__16F628A                         00000001
+bitCount                          00000020
+bitWait                           00000021
+c_flag                            00000000
+dataReg                           00000021
+markWait                          00000026
+readSwitches                      00000011
+readyLED                          3
+readySW                           2
+sendData                          00000015
+sendEight                         0000001D
+serialLN                          1
+startBit                          0000001A
+tmr0_overf                        00000002
+turnOffLed                        00000010
+
+Errors   :     0
+Warnings :     3 reported,     0 suppressed
+Messages :     3 reported,     0 suppressed
+
+

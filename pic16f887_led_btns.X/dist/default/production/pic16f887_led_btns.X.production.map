@@ -1,0 +1,62 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Tue Sep 27 23:56:29 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_0       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x000082
+.config_2007_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002007    program   0x000002
+.config_2008_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002008    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x000045      
+                            0x002007    0x002008      
+            71 out of 8455 program addresses used, program memory utilization is 0%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+              BTN_RELEASE   0x00002c    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                    DELAY   0x000039    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                 EXIT_ISR   0x000031    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                      ISR   0x000016    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                    JLOOP   0x000040    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                    KLOOP   0x000041    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                   LIGHTS   0x000014    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+               LONG_DELAY   0x00003e    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+              NOT_PRESSED   0x000037    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                 RB4_CHNG   0x000023    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                 RB7_CHNG   0x000028    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                   REPEAT   0x00003b    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                   LIGHTS   0x000014    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                      ISR   0x000016    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                 RB4_CHNG   0x000023    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                 RB7_CHNG   0x000028    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+              BTN_RELEASE   0x00002c    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                 EXIT_ISR   0x000031    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+              NOT_PRESSED   0x000037    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                    DELAY   0x000039    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                   REPEAT   0x00003b    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+               LONG_DELAY   0x00003e    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                    JLOOP   0x000040    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+                    KLOOP   0x000041    program     static C:\Users\NUC\MPLABXProjects\pic16f887_led_btns.X\pic_8b_general.asm
+
+

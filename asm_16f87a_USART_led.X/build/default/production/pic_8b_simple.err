@@ -1,0 +1,17 @@
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 41 : Found directive in column 1. (CBLOCK)
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 48 : Found directive in column 1. (ENDC)
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 95 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 97 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 102 : Using default destination of 1 (file).
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 136 : Found label after column 1. (qafdhgkj415kghoimmbjnfnnshfihrthjhvfjbjkjl)
+Warning[208] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 136 : Label truncated at 32 characters. (qafdhgkj415kghoimmbjnfnnshfihrthjhvfjbjkjl)
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 140 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 142 : Using default destination of 1 (file).
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 142 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 144 : Using default destination of 1 (file).
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 144 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 146 : Using default destination of 1 (file).
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 146 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 150 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 152 : Using default destination of 1 (file).
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_16F87A_USART_LED.X\PIC_8B_SIMPLE.ASM 157 : Register in operand not in bank 0.  Ensure that bank bits are correct.

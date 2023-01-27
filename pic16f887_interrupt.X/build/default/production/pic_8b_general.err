@@ -1,0 +1,2 @@
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT.X\PIC_8B_GENERAL.ASM 91 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT.X\PIC_8B_GENERAL.ASM 94 : Register in operand not in bank 0.  Ensure that bank bits are correct.

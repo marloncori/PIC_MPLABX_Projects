@@ -1,0 +1,50 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Wed Sep 28 21:16:26 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_0       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x00002a
+.config_2007_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002007    program   0x000002
+.config_2008_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002008    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x000019      
+                            0x002007    0x002008      
+            27 out of 8455 program addresses used, program memory utilization is 0%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    CLOOP   0x000012    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+                 DEBOUNCE   0x00000f    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+             PRESS_DETECT   0x00000b    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+                   REPEAT   0x000011    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+                   TOGGLE   0x000018    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+          _MAIN_PROG_0007   0x00000c    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+             PRESS_DETECT   0x00000b    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+          _MAIN_PROG_0007   0x00000c    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+                 DEBOUNCE   0x00000f    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+                   REPEAT   0x000011    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+                    CLOOP   0x000012    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+                   TOGGLE   0x000018    program     static C:\Users\NUC\MPLABXProjects\pic16f887_pd_btn_led.X\pic_8b_general.asm
+
+

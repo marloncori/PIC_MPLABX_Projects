@@ -1,0 +1,102 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Thu Oct 20 03:46:32 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_0       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x0001f4
+.config_2007_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002007    program   0x000002
+.config_2008_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002008    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x0000fe      
+                            0x002007    0x002008      
+            256 out of 8455 program addresses used, program memory utilization is 3%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                 FrameErr   0x0000fc    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+               InitSerial   0x0000d4    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                LCDscroll   0x0000c2    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                  OverErr   0x0000f8    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                SerialRcv   0x0000eb    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+               SerialSend   0x0000e5    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+          _MAIN_PROG_00E3   0x0000e8    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                     col0   0x000064    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                     col1   0x000069    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                     col2   0x00006e    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                     col3   0x000073    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                    delay   0x000091    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                delay_125   0x00008a    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                  delay_5   0x00008f    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+               displayDig   0x000057    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                hexLetter   0x000055    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                  initLCD   0x000078    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                    jloop   0x00009b    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                  keyLoop   0x000036    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                  keyScan   0x000030    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                    kloop   0x00009c    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                    line1   0x0000ba    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                    line2   0x0000b2    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                 line2End   0x0000cf    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+               long_delay   0x000099    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                   merge4   0x0000ac    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                   pulseE   0x000095    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                  receive   0x00005e    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                   repeat   0x00008c    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                 scanExit   0x000063    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+               scrollExit   0x0000d3    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                    send8   0x0000a1    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                  keyScan   0x000030    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                  keyLoop   0x000036    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                hexLetter   0x000055    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+               displayDig   0x000057    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                  receive   0x00005e    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                 scanExit   0x000063    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                     col0   0x000064    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                     col1   0x000069    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                     col2   0x00006e    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                     col3   0x000073    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                  initLCD   0x000078    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                delay_125   0x00008a    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                   repeat   0x00008c    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                  delay_5   0x00008f    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                    delay   0x000091    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                   pulseE   0x000095    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+               long_delay   0x000099    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                    jloop   0x00009b    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                    kloop   0x00009c    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                    send8   0x0000a1    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                   merge4   0x0000ac    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                    line2   0x0000b2    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                    line1   0x0000ba    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                LCDscroll   0x0000c2    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                 line2End   0x0000cf    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+               scrollExit   0x0000d3    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+               InitSerial   0x0000d4    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+               SerialSend   0x0000e5    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+          _MAIN_PROG_00E3   0x0000e8    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                SerialRcv   0x0000eb    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                  OverErr   0x0000f8    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+                 FrameErr   0x0000fc    program     static C:\Users\NUC\MPLABXProjects\asm_LCD_keypad.X\pic_8b_simple.asm
+
+

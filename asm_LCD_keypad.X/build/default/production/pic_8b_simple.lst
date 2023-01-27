@@ -1,0 +1,1712 @@
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;******************************************************
+                      00002 ; File name: SerComLCD.asm
+                      00003 ; Last revision: May 14, 2006
+                      00004 ; Author: Julio Sanchez
+                      00005 ; Processor: 16F877
+                      00006 ;
+                      00007 ; Description:
+                      00008 ; 
+                      00009 ; Decode4x4 keypad, display scan code in LCD, and send
+                      00010 ; ASCII character through the serial port. Also receive
+                      00011 ; data through serial port and display on LCD. LCD lines
+                      00012 ; are scrolled by program.
+                      00013 ; Default serial line setting:
+                      00014 ; 2400 baud
+                      00015 ; no parity
+                      00016 ; 1 stop bit
+                      00017 ; 8 character bits
+                      00018 ;
+                      00019 ; Program uses 4-bit PIC-to-LCD interface.
+                      00020 ; Code assumes that LCD is driven by Hitachi HD44780
+                      00021 ; controller and PIC 16F977. Display supports two lines
+                      00022 ; each one with 20 characters. The length, wiring and base
+                      00023 ; address of each display line is stored in #define
+                      00024 ; statements. These statements can be edited to accommodate
+                      00025 ; a different set-up.
+                      00026 
+                      00027 ; Keypad switch wiring (values are scan codes):
+                      00028 ; ?- KEYPAD ?
+                      00029 ; 0 1 2 3 <= port B0 |
+                      00030 ; 4 5 6 7 <= port B1 |?- ROWS = OUTPUTS
+                      00031 ; 8 9 A B <= port B2 |
+                      00032 ; C D E F <= port B3 |
+                      00033 ; | | | |
+                      00034 ; | | | |_____ port B4 |
+                      00035 ; | | |_________ port B5 |?- COLUMNS = INPUTS
+                      00036 ; | |_____________ port B6 |
+                      00037 ; |_________________ port B7 |
+                      00038 ;
+                      00039 ; Operations:
+                      00040 ; 1. Key press action generates a scan code in the range
+                      00041 ; 0x0 to 0xf.
+                      00042 ; 2. Scan code is converted to an ASCII digit and displayed
+                      00043 ; on the LCD. LCD lines are scrolled as end-of-line is
+                      00044 ; reached.
+                      00045 ; 3. Characters typed on the keypad are also transmitted
+                      00046 ; through the serial port.
+                      00047 ; 4. Serial port is polled for received characters. These
+                      00048 ; are displayed on the LCD.
+                      00049 ;
+                      00050 ; WARNING:
+                      00051 ; Code assumes 4MHz clock (default internal CLK for pic16f887).
+                      00052 ; Delay routines must be
+                      00053 ; edited for faster clock. Clock speed also determines
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00054 ; values for baud rate setting (see spbrgVal constant).
+                      00055     
+                      00056 #include "p16f887.inc"
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Jul 02 2017
+                      00005 ;  MPASM PIC16F887 processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00810         LIST
+                      00057 
+                      00058 ; __config 0xE0E5
+2007   20E5           00059  __CONFIG _CONFIG1, _FOSC_INTRC_CLKOUT & _WDTE_OFF & _PWRTE_ON & _MCLRE_ON & _CP_OFF & _CPD_OFF & _BOREN
+                            _OFF & _IESO_OFF & _FCMEN_OFF & _LVP_OFF
+                      00060 
+                      00061 ; __config 0xFEFF
+2008   3EFF           00062  __CONFIG _CONFIG2, _BOR4V_BOR21V & _WRT_OFF
+                      00063  
+                      00064 ; __CONFIG directive is used to embed configuration data
+                      00065 ; within the source file. The labels following the directive
+                      00066 ; are located in the corresponding .inc file.
+                      00067 ;============================================================
+                      00068 ; MACROS
+                      00069 ;============================================================
+                      00070 ; Macros to select the register banks
+                      00071  
+                      00072 Bank0   MACRO               ; Select RAM bank 0
+                      00073         bcf     STATUS,RP0
+                      00074         bcf     STATUS,RP1
+                      00075         ENDM
+                      00076 ;----------------------------------------------
+                      00077 Bank1   MACRO               ; Select RAM bank 1
+                      00078         bsf     STATUS,RP0
+                      00079         bcf     STATUS,RP1
+                      00080         ENDM
+                      00081 ;-----------------------------------------------
+                      00082 Bank2   MACRO               ; Select RAM bank 2
+                      00083         bcf     STATUS,RP0
+                      00084         bsf     STATUS,RP1
+                      00085         ENDM
+                      00086 ;----------------------------------------------
+                      00087 Bank3   MACRO               ; Select RAM bank 3
+                      00088         bsf     STATUS,RP0
+                      00089         bsf     STATUS,RP1
+                      00090         ENDM
+                      00091 
+                      00092 ;=====================================================
+                      00093 ; constant definitions
+                      00094 ; for PIC-to-LCD pin wiring and LCD line addresses
+                      00095 ;=====================================================
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00096 #define E_line      1 ;|
+                      00097 #define RS_line     0 ;| ? from wiring diagram
+                      00098 #define RW_line     2 ;|
+                      00099         
+                      00100 ; LCD line addresses (from LCD data sheet)
+                      00101 #define LCD_1       H'80' ; First LCD line constant
+                      00102 #define LCD_2       H'C0' ; Second LCD line constant
+                      00103 
+                      00104 #define LCDlimit    .20     ; Number of characters per line
+                      00105 #define spbrgVal    .25     ; For 2400 baud on 4Mhz clock
+                      00106 
+                      00107 ; Note: The constants that define the LCD display
+                      00108 ; line addresses have the high-order bit set
+                      00109 ; so as to meet the requirements of controller
+                      00110 ; commands.
+                      00111 ;
+                      00112 ;=====================================================
+                      00113 ; variables in PIC RAM
+                      00114 ;=====================================================
+                      00115 ; Local variables
+                      00116 
+Warning[205]: Found directive in column 1. (cblock)
+                      00117 cblock      H'20'   ; Start of block
+  00000020            00118     count1          ; Counter # 1
+  00000021            00119     count2          ; Counter # 2
+  00000022            00120     count3          ; Counter # 3
+  00000023            00121     J               ; counter J
+  00000024            00122     K               ; counter K
+  00000025            00123     store1          ; Local storage
+  00000026            00124     store2
+                      00125 
+                      00126     ; For LCDscroll procedure
+  00000027            00127     LCDcount        ; Counter for characters per line
+  00000028            00128     LCDline         ; Current display line (0 or 1)
+                      00129 
+  00000029            00130     keyMask         ; For keypad processing
+  0000002A            00131     rowMask         ; For masking-off key rows
+  0000002B            00132     rowCode         ; Row addend for calculating scan code
+  0000002C            00133     rowCount        ; Counter for key rows (0 to 3)
+  0000002D            00134     scanCode        ; Final key code
+  0000002E            00135     newScan         ; 0 if no new scan code detected
+                      00136     ; Communications variables
+  0000002F            00137     newData ; not 0 if new data received
+  00000030            00138     ascVal
+  00000031            00139     errorFlags
+Warning[205]: Found directive in column 1. (ENDC)
+                      00140 endc
+                      00141 
+                      00142 ;===============================================================================
+                      00143 RES_VECT  CODE    H'0000'            ; processor reset vector
+0000   2???           00144     GOTO    START                   ; go to beginning of program
+                      00145 ;===============================================================================
+                      00146 ; add interrupts here if used
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00147     ORG     H'0004'
+0004   0009           00148     RETFIE
+                      00149 ;===============================================================================    
+                      00150 ; PROGRAM
+                      00151 ;===============================================================================
+                      00152 MAIN_PROG CODE                      ; let linker place main program
+                      00153 
+0000                  00154 START
+                      00155 ; Wiring:
+                      00156 ; LCD data to Port D, lines 0 to 7
+                      00157 ;   E line -> port E, 1
+                      00158 ;   RW line -> port E, 2
+                      00159 ;   RS line -> port E, 0
+                      00160 
+                      00161 ; Set PORTE D and E for output
+                      00162 ; Data memory bank selection bits:
+                      00163 ;   RP1:RP0     Bank
+                      00164 ;       0:0     0       Ports A,B,C,D, and E
+                      00165 ;       0:1     1       Tris A,B,C,D, and E
+                      00166 ;       1:0     2
+                      00167 ;       1:1     3
+                      00168 ; First, initialize Port-B by clearing latches
+                      00169     Bank0
+0000   1283               M         bcf     STATUS,RP0
+0001   1303               M         bcf     STATUS,RP1
+0002   0183           00170     clrf    STATUS
+0003   0186           00171     clrf    PORTB
+                      00172 
+                      00173 ; Tris Port D for output. Port D lines 4 to 7 are wired
+                      00174 ; to LCD data lines. Port D lines 0 to 4 are wired to LEDs.
+                      00175     Bank1
+0004   1683               M         bsf     STATUS,RP0
+0005   1303               M         bcf     STATUS,RP1
+0006   3000           00176     movlw   B'00000000'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0007   0088           00177     movwf   TRISD               ; and Port D
+                      00178     
+                      00179 ; By default Port-A lines are analog. To configure them
+                      00180 ; as digital code must set bits 1 and 2 of the ADCON1
+                      00181 ; register (in bank 1)
+                      00182     Bank3
+0008   1683               M         bsf     STATUS,RP0
+0009   1703               M         bsf     STATUS,RP1
+000A   3000           00183     movlw   H'00'               ; binary 0000 0000 is code to
+                      00184                                 ; make all Port-A lines digital
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000B   0088           00185     movwf   ANSEL
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000C   0089           00186     movwf   ANSELH
+                      00187 ; Port-B, lines are wired to keypad switches, as follows:
+                      00188 ; 7 6 5 4 3 2 1 0
+                      00189 ; | | | | |_|_|_|_____ switch rows (output)
+                      00190 ; |_|_|_|_____________ switch columns (input)
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00191 ; rows must be defined as output and columns as input
+                      00192     Bank1
+000D   1683               M         bsf     STATUS,RP0
+000E   1303               M         bcf     STATUS,RP1
+000F   30F0           00193     movlw   H'F0'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0010   0086           00194     movwf   TRISB
+                      00195 
+0011   3000           00196     movlw   H'00'       ; Tris port E for output
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0012   0089           00197     movwf   TRISE       ; Tris port E
+                      00198 ; Enable Port-B pullups for switches in OPTION register
+                      00199 ; 7 6 5 4 3 2 1 0  <= OPTION bits
+                      00200 ; | | | | | |__|__|_____ PS2-PS0 (prescaler bits)
+                      00201 ; | | | | |              Values for Timer0
+                      00202 ; | | | | |                 000 = 1:2 001 = 1:4
+                      00203 ; | | | | |                 010 = 1:8 011 = 1:16
+                      00204 ; | | | | |                 100 = 1:32 101 = 1:64
+                      00205 ; | | | | |                 110 = 1:128 *111 = 1:256
+                      00206 ; | | | | |______________ PSA (prescaler assign)
+                      00207 ; | | | |                    *1 = to WDT
+                      00208 ; | | | |                    0 = to Timer0
+                      00209 ; | | | |_________________ TOSE (Timer0 edge select)
+                      00210 ; | | |                     *0 = increment on low-to-high
+                      00211 ; | | |                      1 = increment in high-to-low
+                      00212 ; | | |____________________ TOCS (TMR0 clock source)
+                      00213 ; | |                       *0 = internal clock
+                      00214 ; | |                       1 = RA4/TOCKI bit source
+                      00215 ; | |_______________________ INTEDG (Edge select)
+                      00216 ; |                          *0 = falling edge
+                      00217 ; |__________________________ NOT_RBPU (POTB pullup enable)
+                      00218 ;                             *0 = enabled
+                      00219 ;                               1 = disabled
+0013   3008           00220     movlw   H'08'               ; or F8?
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0014   0081           00221     movwf   OPTION_REG          ; still at Bank1
+                      00222 
+                      00223     Bank0                       ; Back to bank 0
+0015   1283               M         bcf     STATUS,RP0
+0016   1303               M         bcf     STATUS,RP1
+                      00224     ; Initialize serial port for 9600 baud, 8 bits, no parity
+                      00225     ; 1 stop
+0017   2???           00226     call    InitSerial
+                      00227     
+                      00228     ; Test serial transmission by sending ?RDY-?
+0018   3052           00229     movlw   'R'
+0019   2???           00230     call    SerialSend
+001A   3044           00231     movlw   'D'
+001B   2???           00232     call    SerialSend
+001C   3059           00233     movlw   'Y'
+001D   2???           00234     call    SerialSend
+001E   302D           00235     movlw   '-'
+001F   2???           00236     call    SerialSend
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0020   3020           00237     movlw   H'20'
+0021   2???           00238     call    SerialSend
+                      00239 
+                      00240     ; Clear all output lines
+0022   0188           00241     clrf    PORTD
+0023   0189           00242     clrf    PORTE
+                      00243   
+                      00244     ; Wait and initialize HD44780 LCD
+0024   2???           00245     call    delay_5             ; Allow LCD time to initialize itself
+0025   2???           00246     call    initLCD             ; Then do forced initialization
+0026   2???           00247     call    delay_5             ; (Wait probably not necessary)
+                      00248     ; Clear character counter and line counter variables
+                      00249 
+0027   01A7           00250     clrf    LCDcount
+0028   01A8           00251     clrf    LCDline
+                      00252 
+                      00253     ; Set display address to start of second LCD line
+0029   2???           00254     call    line1
+                      00255 
+                      00256 ;============================================================
+                      00257 ; scan keypad
+                      00258 ;============================================================
+                      00259 ; Keypad switch wiring:    .......................
+                      00260 ;   x x x x     <= port B0 |
+                      00261 ;   x x x x     <= port B1 |?- ROWS = OUTPUTS
+                      00262 ;   x x x x     <= port B2 |
+                      00263 ;   x x x x     <= port B3 |
+                      00264 ;   | | | |_____   port B4 |.....................
+                      00265 ;   | | |_________  port B5 |?- COLUMNS = INPUTS
+                      00266 ;   | |_____________port B6 |
+                      00267 ;   |_______________port B7 |
+                      00268 ;    
+                      00269 ; Switches are connected to Port-B lines
+                      00270 ; Clear scan code register
+002A   01AD           00271     clrf    scanCode
+                      00272     
+                      00273 ;============================
+                      00274 ; scan keypad and display
+                      00275 ;============================
+002B                  00276 keyScan:
+                      00277 ; Port-B, lines are wired to pushbutton switches, as follows:
+                      00278 ; 7 6 5 4 3 2 1 0
+                      00279 ; | | | | |_|_|_|_____ switch rows (output)
+                      00280 ; |_|_|_|_____________ switch columns (input)
+                      00281 ;    
+                      00282 ; Keypad processing:
+                      00283 ; switch rows are successively grounded (row = 0)
+                      00284 ; Then column values are tested. If a column returns 0
+                      00285 ; in a 0 row, that switch is down.
+                      00286 ; Initialize row code addend
+                      00287 
+002B   01AB           00288     clrf    rowCode          ; First row is code 0
+002C   01AE           00289     clrf    newScan          ; No new scan code detected
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00290 
+                      00291                              ; Initialize row count
+002D   3004           00292     movlw   D'4'             ; Four rows
+002E   00AC           00293     movwf   rowCount         ; Register variable
+002F   30FE           00294     movlw   B'11111110'      ; All set but LOB
+0030   00AA           00295     movwf   rowMask
+                      00296 
+0031                  00297 keyLoop:
+                      00298 ; Initialize row eliminator mask:
+                      00299 ; The row mask is ANDed with the key mask to successively
+                      00300 ; mask-off each row, for example:
+                      00301 ;
+                      00302 ;            |???- row 3
+                      00303 ;            ||??? row 2
+                      00304 ;            |||??- row 1
+                      00305 ;            ||||?? row 0
+                      00306 ;            vvvv
+                      00307 ;       0000 1111 <= key mask
+                      00308 ; AND   1111 1101 <= mask for row 1
+                      00309 ;       ??-
+                      00310 ;       0000 1101 <= row 1 is masked off
+                      00311 ;
+                      00312 ; The row mask, which is initally 1111 1110, is rotated left
+                      00313 ; through the carry in order to mask off the next row
+0031   300F           00314     movlw   H'0F'               ; Mask off all lines
+0032   00A9           00315     movwf   keyMask             ; To local register
+                      00316                                 ; Set row mask for current row
+0033   082A           00317     movf    rowMask,w           ; Mask to w
+0034   05A9           00318     andwf   keyMask,f           ; Update key mask
+0035   0829           00319     movf    keyMask,w           ; Key mask to w
+0036   0086           00320     movwf   PORTB               ; Mask-off Port-B lines
+                      00321     
+                      00322     ; Read Port-B lines 4 to 7 (columns are input)
+0037   1E06           00323     btfss   PORTB,4
+0038   2???           00324     call    col0                ; Key column procedures
+0039   1E86           00325     btfss   PORTB,5
+003A   2???           00326     call    col1
+003B   1F06           00327     btfss   PORTB,6
+003C   2???           00328     call    col2
+003D   1F86           00329     btfss   PORTB,7
+003E   2???           00330     call    col3
+                      00331 
+                      00332     ; Index to next row by adding 4 to row code
+003F   082B           00333     movf    rowCode,w           ; Code to w
+0040   3E04           00334     addlw   D'4'
+0041   00AB           00335     movwf   rowCode
+                      00336     
+                      00337 ;=========================
+                      00338 ; shift row mask
+                      00339 ;=========================
+                      00340 ; Set the carry flag
+0042   1403           00341     bsf     STATUS,C
+0043   0DAA           00342     rlf     rowMask,f               ; Rotate mask bits in storage
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE  8
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00343 
+                      00344 ;=========================
+                      00345 ; end of keypad?
+                      00346 ;=========================
+                      00347 ; Test for last key row (maximum count is 4)
+0044   0BAC           00348     decfsz  rowCount,f              ; Decrement counter
+0045   2???           00349     goto    keyLoop
+                      00350 
+                      00351 ;============================================================
+                      00352 ; display, send, and receive data
+                      00353 ;============================================================
+                      00354 ;============================================================
+                      00355 ; At this point all keys have been tested.
+                      00356 ; Variable newScan = 0 if no new scan code detected, else
+                      00357 ; variable scanCode holds scan code
+0046   08AE           00358     movf    newScan,f               ; Copy onto intsef (sets Z
+                      00359                                     ; flag)
+0047   1903           00360     btfsc   STATUS,Z                ; Is it zero
+0048   2???           00361     goto    receive
+                      00362                                     ; At this point a new scan code is detected
+0049   082D           00363     movf    scanCode,w              ; To w
+                      00364 ; If scan code is in the range 0 to 9, that is, a decimal
+                      00365 ; digit, then ASCII conversion consists of adding 0x30.
+                      00366 ; If the scan code represents one of the hex letters
+                      00367 ; (0xa to 0xf) then ASCII conversion requires adding
+                      00368 ; 0x37
+                      00369 
+004A   3C09           00370     sublw   H'09'                   ; 9 - w
+                      00371     ; if w from 0 to 9 then 9 - w = positive (C flag = 1)
+                      00372     ; if w = 0xa then 9 - 10 = -1 (C flag = 0)
+                      00373     ; if w = 0xc then 9 - 12 = -2 (C flag = 0)
+004B   1C03           00374     btfss   STATUS,C                ; Test carry flag
+004C   2???           00375     goto    hexLetter               ; Carry clear, must be a letter
+                      00376     ; At this point scan code is a decimal digit in the
+                      00377     ; range 0 to 9. Convert to ASCII by adding 0x30
+004D   082D           00378     movf    scanCode,w              ; Recover scan code
+004E   3E30           00379     addlw   H'30'                   ; Convert to ASCII
+004F   2???           00380     goto    displayDig
+                      00381 
+0050                  00382 hexLetter:
+0050   082D           00383     movf    scanCode,w              ; Recover scan code
+0051   3E37           00384     addlw   H'37'                   ; Convert to ASCII
+                      00385 
+0052                  00386 displayDig:
+0052   00B0           00387     movwf   ascVal                  ; Store so it can be sent
+0053   2???           00388     call    send8                   ; Display routine
+0054   2???           00389     call    LCDscroll
+0055   2???           00390     call    long_delay              ; Debounce
+                      00391 
+                      00392                                     ; Recover ASCII
+0056   0830           00393     movf    ascVal,w
+0057   2???           00394     call    SerialSend
+0058   2???           00395     goto    scanExit
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE  9
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00396     
+                      00397 ;==========================
+                      00398 ; receive serial data
+                      00399 ;==========================
+0059                  00400 receive:
+0059   2???           00401     call    SerialRcv                   ; Call serial receive procedure
+                      00402                                         ; HOB of newData register is set 
+                      00403                                         ; if new data has been received
+005A   1FAF           00404     btfss   newData,7
+005B   2???           00405     goto    scanExit
+                      00406                                         ; At this point new data was received
+005C   2???           00407     call    send8                       ; Display in LCD
+005D   2???           00408     call    LCDscroll                   ; Scroll at end of line
+                      00409 
+005E                  00410 scanExit:
+005E   2???           00411     goto    keyScan                     ; Continue
+                      00412     
+                      00413 ;==========================
+                      00414 ; calculate scan code
+                      00415 ;==========================
+                      00416 ; The column position is added to the row code (stored
+                      00417 ; in rowCode register). Sum is the scan code
+005F                  00418 col0:
+005F   082B           00419     movf    rowCode,w                   ; Row code to w
+0060   3E00           00420     addlw   H'00'                       ; Add 0 (clearly not necessary)
+                      00421 
+0061   00AD           00422     movwf   scanCode                    ; Final value
+0062   0AAE           00423     incf    newScan,f                   ; New scan code
+0063   0008           00424     return
+                      00425 
+0064                  00426 col1:
+0064   082B           00427     movf    rowCode,w                   ; Row code to w
+0065   3E01           00428     addlw   H'01'                       ; Add 1
+0066   00AD           00429     movwf   scanCode
+0067   0AAE           00430     incf    newScan,f
+0068   0008           00431     return
+                      00432 
+0069                  00433 col2:
+0069   082B           00434     movf    rowCode,w                   ; Row code to w
+006A   3E02           00435     addlw   H'02'                        ; Add 2
+006B   00AD           00436     movwf   scanCode
+006C   0AAE           00437     incf    newScan,f
+006D   0008           00438     return
+                      00439 
+006E                  00440 col3:
+006E   082B           00441     movf    rowCode,w                   ; Row code to w
+006F   3E03           00442     addlw   H'03'                       ; Add 3
+0070   00AD           00443     movwf   scanCode
+0071   0AAE           00444     incf    newScan,f
+0072   0008           00445     return
+                      00446 
+                      00447 ;============================================================
+                      00448 ; LOCAL PROCEDURES
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 10
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00449 ;============================================================
+                      00450 ;==========================
+                      00451 ; init LCD for 4-bit mode
+                      00452 ;==========================
+0073                  00453 initLCD:
+                      00454 ; Initialization for Densitron LCD module as follows:
+                      00455 ; 4-bit interface
+                      00456 ; 2 display lines of 16 characters each
+                      00457 ; cursor on
+                      00458 ; left-to-right increment
+                      00459 ; cursor shift right
+                      00460 ; no display shift
+                      00461 ;=======================|
+                      00462 ; set command mode |
+                      00463 ;=======================|
+0073   1089           00464     bcf     PORTE,E_line                    ; E line low
+0074   1009           00465     bcf     PORTE,RS_line                   ; RS line low
+0075   1109           00466     bcf     PORTE,RW_line                   ; Write mode
+0076   2???           00467     call    delay_125                       ; delay 125 microseconds
+                      00468 ;***********************|
+                      00469 ; FUNCTION SET |
+                      00470 ;***********************|
+0077   3028           00471     movlw   H'28'                                   
+                      00472                         ; 0 0 1 0 1 0 0 0 (FUNCTION SET)
+                      00473                         ;     | | | |__ font select:
+                      00474                         ;     | | |             1 = 5x10 in 1/8 or 1/11
+                      00475                         ;     | | |             0 = 1/16 dc
+                      00476                         ;     | | |___ Duty cycle select
+                      00477                         ;     | |               0 = 1/8 or 1/11
+                      00478                         ;     | |               1 = 1/16
+                      00479                         ;     | |___ Interface width
+                      00480                         ;     |       0 = 4 bits
+                      00481                         ;     |       1 = 8 bits
+                      00482                         ;     |___ FUNCTION SET COMMAND
+                      00483 
+0078   2???           00484     call    send8       ; 4-bit send routine
+                      00485     ; Set 4-bit mode command must be repeated
+0079   3028           00486     movlw   H'28'
+007A   2???           00487     call    send8
+                      00488     
+                      00489 ;***********************|
+                      00490 ; DISPLAY AND CURSOR ON |
+                      00491 ;***********************|
+007B   300E           00492     movlw   H'0E' 
+                      00493 ; 0 0 0 0 1 1 1 0 (DISPLAY ON/OFF)
+                      00494 ;         | | | |___ Blink character
+                      00495 ;         | | |        1 = on, 0 = off
+                      00496 ;         | | |___ Cursor on/off
+                      00497 ;         | |          1 = on, 0 = off
+                      00498 ;         | |____ Display on/off
+                      00499 ;         |            1 = on, 0 = off
+                      00500 ;         |____ COMMAND BIT
+007C   2???           00501     call    send8
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 11
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00502 ;***********************|
+                      00503 ; set entry mode |
+                      00504 ;***********************|
+007D   3006           00505     movlw   H'06'
+                      00506 ; 0 0 0 0 0 1 1 0  (ENTRY MODE SET)
+                      00507 ;           | | |___ display shift
+                      00508 ;           | |         1 = shift
+                      00509 ;           | |          0 = no shift
+                      00510 ;           | |____ increment mode
+                      00511 ;           |           1 = left-to-right
+                      00512 ;           |           0 = right-to-left
+                      00513 ;           |___ COMMAND BIT
+                      00514 
+007E   2???           00515     call    send8
+                      00516 ;***********************|
+                      00517 ; cursor/display shift |
+                      00518 ;***********************|
+007F   3014           00519     movlw   H'14'   
+                      00520 ; 0 0 0 1 0 1 0 0 (CURSOR/DISPLAY SHIFT)
+                      00521 ;       | | | |_|___ don?t care
+                      00522 ;       | |_|__ cursor/display shift
+                      00523 ;       |           00 = cursor shift left
+                      00524 ;       |           01 = cursor shift right
+                      00525 ;       |           10 = cursor and display
+                      00526 ;       |                shifted left
+                      00527 ;       |           11 = cursor and display
+                      00528 ;       |                shifted right
+                      00529 ;       |___ COMMAND BIT
+0080   2???           00530     call    send8
+                      00531     
+                      00532 ;***********************|
+                      00533 ; clear display |
+                      00534 ;***********************|
+0081   3001           00535     movlw   H'01' 
+                      00536 ;00000001 (CLEAR DISPLAY)
+                      00537 ;       |___ COMMAND BIT
+0082   2???           00538     call    send8
+                      00539     ; according to datasheet
+0083   2???           00540     call    delay_5 ; Test for busy
+0084   0008           00541     return
+                      00542 
+                      00543 ;=======================
+                      00544 ; Procedure to delay
+                      00545 ; 42 microseconds
+                      00546 ;=======================
+0085                  00547 delay_125:
+0085   302A           00548     movlw   D'42'           ; Repeat 42 machine cycles
+0086   00A0           00549     movwf   count1          ; Store value in counter
+                      00550 
+0087                  00551 repeat
+0087   0BA0           00552     decfsz  count1,f        ; Decrement counter
+0088   2???           00553     goto    repeat          ; Continue if not 0
+0089   0008           00554     return                  ; End of delay
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 12
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00555 
+                      00556 ;=======================
+                      00557 ; Procedure to delay
+                      00558 ; 5 milliseconds
+                      00559 ;=======================
+008A                  00560 delay_5:
+008A   302A           00561     movlw   D'42'           ; Counter = 41
+008B   00A1           00562     movwf   count2          ; Store in variable
+008C                  00563 delay
+008C   2???           00564     call    delay_125       ; Delay
+008D   0BA1           00565     decfsz  count2,f        ; 40 times = 5 milliseconds
+008E   2???           00566     goto    delay
+008F   0008           00567     return                  ; End of delay
+                      00568 
+                      00569 ;========================
+                      00570 ; pulse E line
+                      00571 ;========================
+0090                  00572 pulseE
+0090   1489           00573     bsf     PORTE,E_line        ; Pulse E line
+0091   0000           00574     nop
+0092   1089           00575     bcf     PORTE,E_line
+0093   0008           00576     return
+                      00577 
+                      00578 ;=============================
+                      00579 ; long delay sub-routine
+                      00580 ;=============================
+0094                  00581 long_delay:
+0094   30C8           00582     movlw   D'200'              ; w delay count
+0095   00A3           00583     movwf   J                   ;J=w
+0096                  00584 jloop
+0096   00A4           00585     movwf   K                   ;K=w
+0097                  00586 kloop
+0097   0BA4           00587     decfsz  K,f                 ; K = K-1, skip next if zero
+0098   2???           00588     goto    kloop
+0099   0BA3           00589     decfsz  J,f                 ; J = J-1, skip next if zero
+009A   2???           00590     goto    jloop
+009B   0008           00591     return
+                      00592 
+                      00593 ;========================
+                      00594 ; send 2 nibbles in
+                      00595 ; 4-bit mode
+                      00596 ;========================
+                      00597 ; Procedure to send two 4-bit values to Port-B lines
+                      00598 ; 7, 6, 5, and 4. High-order nibble is sent first
+                      00599 ; ON ENTRY:
+                      00600 ; w register holds 8-bit value to send
+009C                  00601 send8:
+009C   00A5           00602     movwf   store1                      ; Save original value
+009D   2???           00603     call    merge4                      ; Merge with Port-B
+                      00604 
+                      00605     ; Now w has merged byte
+009E   0088           00606     movwf   PORTD                       ; w to Port D
+009F   2???           00607     call    pulseE                      ; Send data to LCD
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 13
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00608 
+                      00609     ; High nibble is sent
+00A0   0825           00610     movf    store1,w                    ; Recover byte into w
+00A1   0E25           00611     swapf   store1,w                    ; Swap nibbles in w
+00A2   2???           00612     call    merge4
+00A3   0088           00613     movwf   PORTD
+00A4   2???           00614     call    pulseE                      ; Send data to LCD
+00A5   2???           00615     call    delay_125
+00A6   0008           00616     return
+                      00617 
+                      00618 ;==========================
+                      00619 ; merge bits
+                      00620 ;==========================
+                      00621 ; Routine to merge the 4 high-order bits of the
+                      00622 ; value to send with the contents of Port-B
+                      00623 ; so as to preserve the 4 low-bits in Port-B
+                      00624 ; Logic:
+                      00625 ;     AND value with 1111 0000 mask
+                      00626 ;    AND Port-B with 0000 1111 mask
+                      00627 ;       Now low nibble in value and high nibble in
+                      00628 ;       Port-B are all 0 bits:
+                      00629 ;            value = vvvv 0000
+                      00630 ;             Port-B = 0000 bbbb
+                      00631 ;       OR value and Port-B resulting in:
+                      00632 ;                    vvvv bbbb
+                      00633 ; ON ENTRY:
+                      00634 ;           w contain value bits
+                      00635 ; ON EXIT:
+                      00636 ;           w contains merged bits
+00A7                  00637 merge4:
+00A7   39F0           00638     andlw   H'F0'                   ; ANDing with 0 clears the
+                      00639                                     ; bit. ANDing with 1 preserves
+                      00640                                     ; the original value
+00A8   00A6           00641     movwf   store2                  ; Save result in variable
+00A9   0808           00642     movf    PORTD,w                 ; Port-B to w register
+00AA   390F           00643     andlw   H'0F'                   ; Clear high nibble in Port-B
+                      00644                                     ; and preserve low nibble
+00AB   0426           00645     iorwf   store2,w                ; OR two operands in w
+00AC   0008           00646     return
+                      00647 
+                      00648 ;==========================
+                      00649 ; Set address register
+                      00650 ; to LCD line 2
+                      00651 ;==========================
+                      00652 ; ON ENTRY:
+                      00653 ; Address of LCD line 2 in constant LCD_2
+00AD                  00654 line2:
+00AD   1089           00655     bcf     PORTE,E_line                ; E line low
+00AE   1009           00656     bcf     PORTE,RS_line               ; RS line low, setup for control
+00AF   2???           00657     call    delay_5                     ; Busy?
+                      00658 
+                      00659                                         ; Set to second display line
+00B0   30C0           00660     movlw   LCD_2                       ; Address with high-bit set
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 14
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00B1   2???           00661     call    send8
+                      00662                                         ; Set RS line for data
+00B2   1409           00663     bsf     PORTE,RS_line               ; RS = 1 for data
+00B3   2???           00664     call    delay_5                     ; Busy?
+00B4   0008           00665     return
+                      00666 
+                      00667 ;==========================
+                      00668 ; Set address register
+                      00669 ; to LCD line 1
+                      00670 ;==========================
+                      00671 ; ON ENTRY:
+                      00672 ;   Address of LCD line 1 in constant LCD_1
+00B5                  00673 line1:
+00B5   1089           00674     bcf     PORTE,E_line                ; E line low
+00B6   1009           00675     bcf     PORTE,RS_line               ; RS line low, set up for control
+00B7   2???           00676     call    delay_5                     ; busy?
+                      00677 
+                      00678                                         ; Set to second display line
+00B8   3080           00679     movlw   LCD_1                       ; Address and command bit
+00B9   2???           00680     call    send8                       ; 4-bit routine
+                      00681 
+                      00682                                         ; Set RS line for data
+00BA   1409           00683     bsf     PORTE,RS_line               ; Setup for data
+00BB   2???           00684     call    delay_5                      ; Busy?
+00BC   0008           00685     return
+                      00686 
+                      00687 ;==========================
+                      00688 ; scroll to LCD line 2
+                      00689 ;==========================
+                      00690 ; Procedure to count the number of characters displayed on
+                      00691 ; each LCD line. If the number reaches the value in the
+                      00692 ; constant LCDlimit, then display is scrolled to the second
+                      00693 ; LCD line. If at the end of the second line, then LCD is
+                      00694 ; reset to the first line.
+00BD                  00695 LCDscroll:
+00BD   0AA7           00696     incf    LCDcount,f              ; Bump counter
+                      00697                                     ; Test for line limit
+00BE   0827           00698     movf    LCDcount,w
+00BF   3C14           00699     sublw   LCDlimit                ; Count minus limit
+00C0   1D03           00700     btfss   STATUS,Z                ; Is count - limit = 0
+00C1   2???           00701     goto    scrollExit              ; Go if not at end of line
+                      00702     ; At this point the end of the LCD line was reached
+                      00703     ; Test if this is also the end of the second line
+00C2   0828           00704     movf    LCDline,w
+00C3   3C01           00705     sublw   H'01'                   ; Is it line 1?
+00C4   1903           00706     btfsc   STATUS,Z                ; Is LCDline minus 1 = 0?
+00C5   2???           00707     goto    line2End                ; Go if end of second line
+                      00708     ; At this point it is the end of the top LCD line
+00C6   2???           00709     call    line2                   ; Scroll to second line
+00C7   01A7           00710     clrf    LCDcount                ; Reset counter
+00C8   0AA8           00711     incf    LCDline,f               ; Bump line counter
+00C9   2???           00712     goto    scrollExit              ; End of second LCD line
+                      00713     
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 15
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00CA                  00714 line2End:
+00CA   2???           00715     call    initLCD                 ; Reset
+00CB   01A7           00716     clrf    LCDcount                ; Clear counters
+00CC   01A8           00717     clrf    LCDline
+00CD   2???           00718     call    line1                   ; Display to first line
+                      00719 
+00CE                  00720 scrollExit:
+00CE   0008           00721     return
+                      00722 
+                      00723 ;==============================================================
+                      00724 ; communications procedures
+                      00725 ;==============================================================
+                      00726 ; Initizalize serial port for 2400 baud, 8 bits, no parity,
+                      00727 ; 1 stop
+00CF                  00728 InitSerial:
+                      00729     Bank1                       ; Macro to select bank1
+00CF   1683               M         bsf     STATUS,RP0
+00D0   1303               M         bcf     STATUS,RP1
+                      00730     ; Bits 6 and 7 of Port C are multiplexed as TX/CK and RX/DT
+                      00731     ; for USART operation. These bits must be set to input in the
+                      00732     ; TRISC register
+00D1   30C0           00733     movlw   b'11000000'         ; Bits for TX and RX
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+00D2   0487           00734     iorwf   TRISC, f            ; OR into Trisc register
+                      00735     ; The asynchronous baud rate is calculated as follows:
+                      00736     ;         Fosc
+                      00737     ; ABR = ---------
+                      00738     ;        S*(x+1)
+                      00739     ;                Where: x is value in the SPBRG register 
+                      00740     ;                and S is 64 if the high
+                      00741     ;                baud rate select bit (BRGH) in the TXSTA control 
+                      00742     ;                register is clear, and 16 if the BRGH bit is set. 
+                      00743     ;
+                      00744     ; For setting to 9600 baud rate, using a 
+                      00745     ;  4MHz oscillator at a high-speed baud rate the formula is:
+                      00746     ;
+                      00747     ;      4,000,000     4,000,000
+                      00748     ;     ----------- = ----------- =  9,615 baud (0.16% error)
+                      00749     ;       16*(25+1)        416
+                      00750     ;
+                      00751     ;  At slow speed (BRGH = 0)
+                      00752     ;       4,000,000      4,000,000
+                      00753     ;      -----------  = ----------- = 2,403.85 (0.16% error)
+                      00754     ;       64*(25+1)        1,664
+                      00755     ;
+00D3   3019           00756     movlw spbrgVal              ; Value in spbrgVal = 25
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+00D4   0099           00757     movwf SPBRG                 ; Place in baud rate generator
+                      00758     
+                      00759     ; TXSTA (Transmit Status and Control Register) bit map:
+                      00760     ; 7 6 5 4 3 2 1 0 <== bits
+                      00761     ; | | | | | | | |______ TX9D 9nth data bit on
+                      00762     ; | | | | | | |           ? (used for parity)
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 16
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00763     ; | | | | | | |_________ TRMT Transmit Shift Register
+                      00764     ; | | | | | |               1 = TSR empty
+                      00765     ; | | | | | |               * 0 = TSR full
+                      00766     ; | | | | | |____________ BRGH High Speed Baud Rate
+                      00767     ; | | | | |                 (Asynchronous mode only)
+                      00768     ; | | | | |                 1= high speed (* 4)
+                      00769     ; | | | | |                 * 0 = low speed
+                      00770     ; | | | | |__________ NOT USED
+                      00771     ; | | | |_____________  SYNC USART Mode Select
+                      00772     ; | | |                     1 = synchronous mode
+                      00773     ; | | |                     * 0 = asynchronous mode
+                      00774     ; | | |________________ TXEN Transmit Enable
+                      00775     ; | |                       * 1 = transmit enabled
+                      00776     ; | |                       0 = transmit disabled
+                      00777     ; | |___________________ TX9 Enable 9-bit Transmit
+                      00778     ; |                         1 = 9-bit transmission mode
+                      00779     ; |                         * 0 = 8-bit mode
+                      00780     ; |______________________ CSRC Clock Source Select
+                      00781     ;                               Not used in asynchronous mode
+                      00782     ;                           Synchronous mode:
+                      00783     ;                                1 = Master Mode (internal clock)
+                      00784     ;                               * 0 = Slave mode (external clock)
+                      00785     ; Setup value: 0010 0000 = 0x20
+00D5   3020           00786     movlw   H'20'                       ; Enable transmission and high 
+                      00787                                         ; baud rate
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+00D6   0098           00788     movwf   TXSTA
+                      00789     
+                      00790     Bank3
+00D7   1683               M         bsf     STATUS,RP0
+00D8   1703               M         bsf     STATUS,RP1
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+00D9   1187           00791     bcf     BAUDCTL, BRG16              ; 8 bits resolution
+                      00792     
+                      00793     Bank0                               ; select bank 0
+00DA   1283               M         bcf     STATUS,RP0
+00DB   1303               M         bcf     STATUS,RP1
+                      00794 ; RCSTA (Receive Status and Control Register) bit map:
+                      00795 ; 7 6 5 4 3 2 1 0 <== bits
+                      00796 ; | | | | | | | |______ RX9D 9th data bit received
+                      00797 ; | | | | | | |             ? (can be parity bit)
+                      00798 ; | | | | | | |_________ OERR Overrun errror
+                      00799 ; | | | | | |               ? 1= error (cleared by software)
+                      00800 ; | | | | | |____________ FERR Framing Error
+                      00801 ; | | | | |                 ? 1= error
+                      00802 ; | | | | |_______________ NOT USED
+                      00803 ; | | | |____________ CREN Continuous Receive Enable
+                      00804 ; | | |                     Asynchronous mode:
+                      00805 ; | | |                         * 1 = Enable continuous receive
+                      00806 ; | | |                         0 = Disables continuous receive
+                      00807 ; | | |                     Synchronous mode:
+                      00808 ; | | |                         1 = Enables until CREN cleared
+                      00809 ; | | |                         0 = Disables continuous receive
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 17
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00810 ; | | |_______________ SREN Single Receive Enable
+                      00811 ; | |                           ? Asynchronous mode = don?t care
+                      00812 ; | |                   Synchronous master mode:
+                      00813 ; | |                           1 = Enable single receive
+                      00814 ; | |                           0 = Disable single receive
+                      00815 ; | |__________________ RX9 9th-bit Receive Enable
+                      00816 ; |                             1 = 9-bit reception
+                      00817 ; |                             * 0 = 8-bit reception
+                      00818 ; |_____________________ SPEN Serial Port Enable
+                      00819 ;                           * 1 = RX/DT and TX/CK are serial pins
+                      00820 ;                           0 = Serial port disabled
+                      00821 ;    
+                      00822 ; Setup value: 1001 0000 = 0x90
+00DC   3090           00823     movlw   H'90'                       ; Enable serial port and
+                      00824                                         ; continuous reception
+00DD   0098           00825     movwf   RCSTA
+00DE   01B1           00826     clrf    errorFlags                  ; Clear local error flags variable
+00DF   0008           00827     return
+                      00828 
+                      00829 ;==============================
+                      00830 ; transmit data
+                      00831 ;==============================
+                      00832 ; Test for Transmit Register Empty and transmit data in w
+00E0                  00833 SerialSend:
+                      00834     Bank0                               ; Select bank 0
+00E0   1283               M         bcf     STATUS,RP0
+00E1   1303               M         bcf     STATUS,RP1
+00E2   1E0C           00835     btfss   PIR1,TXIF                   ; check if transmitter busy
+00E3   2???           00836     goto    $-1                         ; wait until transmitter is
+                      00837                                         ; not busy
+                      00838 
+00E4   0099           00839     movwf   TXREG                       ; and transmit the data
+00E5   0008           00840     return
+                      00841 
+                      00842 ;==============================
+                      00843 ; receive data
+                      00844 ;==============================
+                      00845 ; Procedure to test line for data received and return value
+                      00846 ; in w. Overrun and framing errors are detected and
+                      00847 ; remembered in the variable errorFlags, as follows:
+                      00848 ; 7 6 5 4 3 2 1 0 <== errorFlags
+                      00849 ; ? not used ?? | |___ overrun error
+                      00850 ; |______ framing error
+00E6                  00851 SerialRcv:
+00E6   01AF           00852     clrf    newData                         ; Clear new data received register
+                      00853     
+                      00854     Bank0                                   ; Select bank 0
+00E7   1283               M         bcf     STATUS,RP0
+00E8   1303               M         bcf     STATUS,RP1
+                      00855     ; Bit 5 (RCIF) of the PIR1 Register is clear if the USART
+                      00856     ; receive buffer is empty. If so, no data has been received
+00E9   1E8C           00857     btfss   PIR1, RCIF                      ; Check for received data
+00EA   0008           00858     return                                  ; Exit if no data
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 18
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00859     
+                      00860     ; At this point data has been received. First eliminate
+                      00861     ; possible errors: overrun and framing.
+                      00862     ; Bit 1 (OERR) of the RCSTA register detects overrun
+                      00863     ; Bit 2 (FERR) of the RCSTA register detects framing error
+                      00864     
+00EB   1898           00865     btfsc   RCSTA, OERR                     ; Test for overrun error
+00EC   2???           00866     goto    OverErr                         ; Error handler
+00ED   1918           00867     btfsc   RCSTA,FERR                      ; Test for framing error
+00EE   2???           00868     goto    FrameErr                        ; Error handler
+                      00869                                             ; At this point no error was detected
+                      00870                                             ; Received data is in the USART 
+                      00871                                             ; RCREG register
+00EF   081A           00872     movf    RCREG,w                         ; get received data
+00F0   17AF           00873     bsf     newData,7                       ; Set bit 7 to indicate new data
+                      00874                                             ; Clear error flags
+00F1   01B1           00875     clrf    errorFlags
+00F2   0008           00876     return
+                      00877 
+                      00878 ;==========================
+                      00879 ; error handlers
+                      00880 ;==========================
+00F3                  00881 OverErr:
+00F3   1431           00882     bsf errorFlags,0                        ; Bit 0 is overrun error
+                      00883                                             ; Reset system
+00F4   1218           00884     bcf     RCSTA, CREN                     ; Clear continuous receive bit
+00F5   1618           00885     bsf     RCSTA, CREN                     ; Set to re-enable reception
+00F6   0008           00886     return
+                      00887 
+                      00888 ; error because FERR framing error bit is set
+                      00889 ; can do special error handling here 
+                      00890 ; this code simply clears and continues
+00F7                  00891 FrameErr:
+00F7   14B1           00892     bsf     errorFlags,1                    ; Bit 1 is framing error
+00F8   081A           00893     movf    RCREG, W                        ; Read and throw away bad data
+00F9   0008           00894     return
+                      00895 
+                      00896 ;===============================================================================
+20E5 3EFF             00897     END
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 19
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ABDEN                             00000000
+ABDOVF                            00000007
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ANS0                              00000000
+ANS1                              00000001
+ANS10                             00000002
+ANS11                             00000003
+ANS12                             00000004
+ANS13                             00000005
+ANS2                              00000002
+ANS3                              00000003
+ANS4                              00000004
+ANS5                              00000005
+ANS6                              00000006
+ANS7                              00000007
+ANS8                              00000000
+ANS9                              00000001
+ANSEL                             00000188
+ANSELH                            00000189
+BAUDCTL                           00000187
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BRG0                              00000000
+BRG1                              00000001
+BRG10                             00000002
+BRG11                             00000003
+BRG12                             00000004
+BRG13                             00000005
+BRG14                             00000006
+BRG15                             00000007
+BRG16                             00000003
+BRG2                              00000002
+BRG3                              00000003
+BRG4                              00000004
+BRG5                              00000005
+BRG6                              00000006
+BRG7                              00000007
+BRG8                              00000000
+BRG9                              00000001
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 20
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+BRGH                              00000002
+Bank0                             
+Bank1                             
+Bank2                             
+Bank3                             
+C                                 00000000
+C1CH0                             00000000
+C1CH1                             00000001
+C1IE                              00000005
+C1IF                              00000005
+C1OE                              00000005
+C1ON                              00000007
+C1OUT                             00000006
+C1POL                             00000004
+C1R                               00000002
+C1RSEL                            00000005
+C1SEN                             00000005
+C2CH0                             00000000
+C2CH1                             00000001
+C2IE                              00000006
+C2IF                              00000006
+C2OE                              00000005
+C2ON                              00000007
+C2OUT                             00000006
+C2POL                             00000004
+C2R                               00000002
+C2REN                             00000004
+C2RSEL                            00000004
+C2SYNC                            00000000
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1                             00000015
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2                             0000001B
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 21
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CHS0                              00000002
+CHS1                              00000003
+CHS2                              00000004
+CHS3                              00000005
+CKE                               00000006
+CKP                               00000004
+CM1CON0                           00000107
+CM2CON0                           00000108
+CM2CON1                           00000109
+CREN                              00000004
+CSRC                              00000007
+D                                 00000005
+DATA_ADDRESS                      00000005
+DC                                00000001
+DC1B0                             00000004
+DC1B1                             00000005
+DC2B0                             00000004
+DC2B1                             00000005
+D_A                               00000005
+D_NOT_A                           00000005
+ECCPAS                            0000009C
+ECCPAS0                           00000004
+ECCPAS1                           00000005
+ECCPAS2                           00000006
+ECCPASE                           00000007
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDAT                             0000010C
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+E_line                            1
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+FVREN                             00000000
+FrameErr                          000000F7
+GCEN                              00000007
+GIE                               00000007
+GO                                00000001
+GO_DONE                           00000001
+GO_NOT_DONE                       00000001
+HTS                               00000002
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+INDF                              00000000
+INTCON                            0000000B
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 22
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IOCB                              00000096
+IOCB0                             00000000
+IOCB1                             00000001
+IOCB2                             00000002
+IOCB3                             00000003
+IOCB4                             00000004
+IOCB5                             00000005
+IOCB6                             00000006
+IOCB7                             00000007
+IRCF0                             00000004
+IRCF1                             00000005
+IRCF2                             00000006
+IRP                               00000007
+InitSerial                        000000CF
+J                                 00000023
+K                                 00000024
+LCD_1                             H'80'
+LCD_2                             H'C0'
+LCDcount                          00000027
+LCDlimit                          .20
+LCDline                           00000028
+LCDscroll                         000000BD
+LTS                               00000001
+MC1OUT                            00000007
+MC2OUT                            00000006
+MSK                               00000093
+MSK0                              00000000
+MSK1                              00000001
+MSK2                              00000002
+MSK3                              00000003
+MSK4                              00000004
+MSK5                              00000005
+MSK6                              00000006
+MSK7                              00000007
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000001
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+NOT_W                             00000002
+NOT_WRITE                         00000002
+OERR                              00000001
+OPTION_REG                        00000081
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 23
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+OSCCON                            0000008F
+OSCTUNE                           00000090
+OSFIE                             00000007
+OSFIF                             00000007
+OSTS                              00000003
+OverErr                           000000F3
+P                                 00000004
+P1M0                              00000006
+P1M1                              00000007
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PDC0                              00000000
+PDC1                              00000001
+PDC2                              00000002
+PDC3                              00000003
+PDC4                              00000004
+PDC5                              00000005
+PDC6                              00000006
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PORTD                             00000008
+PORTE                             00000009
+PR2                               00000092
+PRSEN                             00000007
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+PSSAC0                            00000002
+PSSAC1                            00000003
+PSSBD0                            00000000
+PSSBD1                            00000001
+PSTRCON                           0000009D
+PULSR                             00000002
+PULSS                             00000003
+PWM1CON                           0000009B
+R                                 00000002
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RA6                               00000006
+RA7                               00000007
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 24
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RC0                               00000000
+RC1                               00000001
+RC2                               00000002
+RC3                               00000003
+RC4                               00000004
+RC5                               00000005
+RC6                               00000006
+RC7                               00000007
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIDL                             00000006
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+RD0                               00000000
+RD1                               00000001
+RD2                               00000002
+RD3                               00000003
+RD4                               00000004
+RD5                               00000005
+RD6                               00000006
+RD7                               00000007
+RE0                               00000000
+RE1                               00000001
+RE2                               00000002
+RE3                               00000003
+READ_WRITE                        00000002
+RP0                               00000005
+RP1                               00000006
+RSEN                              00000001
+RS_line                           0
+RW_line                           2
+RX9                               00000006
+RX9D                              00000000
+R_NOT_W                           00000002
+R_W                               00000002
+S                                 00000003
+SBOREN                            00000004
+SCKP                              00000004
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 25
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+SCS                               00000000
+SEN                               00000000
+SENDB                             00000003
+SMP                               00000007
+SPBRG                             00000099
+SPBRGH                            0000009A
+SPEN                              00000007
+SR0                               00000006
+SR1                               00000007
+SRCON                             00000185
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPMSK                            00000093
+SSPOV                             00000006
+SSPSTAT                           00000094
+START                             00000000
+STATUS                            00000003
+STRA                              00000000
+STRB                              00000001
+STRC                              00000002
+STRD                              00000003
+STRSYNC                           00000004
+SWDTEN                            00000000
+SYNC                              00000004
+SerialRcv                         000000E6
+SerialSend                        000000E0
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1GINV                            00000007
+T1GIV                             00000007
+T1GSS                             00000001
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1SYNC                            00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMR0                              00000001
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 26
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1GE                            00000006
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISA5                            00000005
+TRISA6                            00000006
+TRISA7                            00000007
+TRISB                             00000086
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+TRISC                             00000087
+TRISC0                            00000000
+TRISC1                            00000001
+TRISC2                            00000002
+TRISC3                            00000003
+TRISC4                            00000004
+TRISC5                            00000005
+TRISC6                            00000006
+TRISC7                            00000007
+TRISD                             00000088
+TRISD0                            00000000
+TRISD1                            00000001
+TRISD2                            00000002
+TRISD3                            00000003
+TRISD4                            00000004
+TRISD5                            00000005
+TRISD6                            00000006
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 27
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TRISD7                            00000007
+TRISE                             00000089
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRISE3                            00000003
+TRMT                              00000001
+TUN0                              00000000
+TUN1                              00000001
+TUN2                              00000002
+TUN3                              00000003
+TUN4                              00000004
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+UA                                00000001
+ULPWUE                            00000005
+ULPWUIE                           00000002
+ULPWUIF                           00000002
+VCFG0                             00000004
+VCFG1                             00000005
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             00000097
+VREN                              00000007
+VROE                              00000006
+VRR                               00000005
+VRSS                              00000004
+W                                 00000000
+WCOL                              00000007
+WDTCON                            00000105
+WDTPS0                            00000001
+WDTPS1                            00000002
+WDTPS2                            00000003
+WDTPS3                            00000004
+WPUB                              00000095
+WPUB0                             00000000
+WPUB1                             00000001
+WPUB2                             00000002
+WPUB3                             00000003
+WPUB4                             00000004
+WPUB5                             00000005
+WPUB6                             00000006
+WPUB7                             00000007
+WR                                00000001
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 28
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+WREN                              00000002
+WRERR                             00000003
+WUE                               00000001
+Z                                 00000002
+_BOR21V                           00003EFF
+_BOR40V                           00003FFF
+_BOR4V_BOR21V                     00003EFF
+_BOR4V_BOR40V                     00003FFF
+_BOREN_NSLEEP                     00003EFF
+_BOREN_OFF                        00003CFF
+_BOREN_ON                         00003FFF
+_BOREN_SBODEN                     00003DFF
+_BOR_NSLEEP                       00003EFF
+_BOR_OFF                          00003CFF
+_BOR_ON                           00003FFF
+_BOR_SBODEN                       00003DFF
+_CONFIG1                          00002007
+_CONFIG2                          00002008
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003F7F
+_CP_OFF                           00003FFF
+_CP_ON                            00003FBF
+_DEBUG_OFF                        00003FFF
+_DEBUG_ON                         00001FFF
+_DEVID1                           00002006
+_EC_OSC                           00003FFB
+_EXTRC                            00003FFF
+_EXTRCIO                          00003FFE
+_EXTRC_OSC_CLKOUT                 00003FFF
+_EXTRC_OSC_NOCLKOUT               00003FFE
+_FCMEN_OFF                        000037FF
+_FCMEN_ON                         00003FFF
+_FOSC_EC                          00003FFB
+_FOSC_EXTRC_CLKOUT                00003FFF
+_FOSC_EXTRC_NOCLKOUT              00003FFE
+_FOSC_HS                          00003FFA
+_FOSC_INTRC_CLKOUT                00003FFD
+_FOSC_INTRC_NOCLKOUT              00003FFC
+_FOSC_LP                          00003FF8
+_FOSC_XT                          00003FF9
+_HS_OSC                           00003FFA
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_IESO_OFF                         00003BFF
+_IESO_ON                          00003FFF
+_INTOSC                           00003FFD
+_INTOSCIO                         00003FFC
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FF8
+_LVP_OFF                          00002FFF
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 29
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_LVP_ON                           00003FFF
+_MAIN_PROG_00E3                   000000E3
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FEF
+_WDTE_OFF                         00003FF7
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FF7
+_WDT_ON                           00003FFF
+_WRT_1FOURTH                      00003BFF
+_WRT_256                          00003DFF
+_WRT_HALF                         000039FF
+_WRT_OFF                          00003FFF
+_XT_OSC                           00003FF9
+__16F887                          00000001
+ascVal                            00000030
+col0                              0000005F
+col1                              00000064
+col2                              00000069
+col3                              0000006E
+count1                            00000020
+count2                            00000021
+count3                            00000022
+delay                             0000008C
+delay_125                         00000085
+delay_5                           0000008A
+displayDig                        00000052
+errorFlags                        00000031
+hexLetter                         00000050
+initLCD                           00000073
+jloop                             00000096
+keyLoop                           00000031
+keyMask                           00000029
+keyScan                           0000002B
+kloop                             00000097
+line1                             000000B5
+line2                             000000AD
+line2End                          000000CA
+long_delay                        00000094
+merge4                            000000A7
+newData                           0000002F
+newScan                           0000002E
+pulseE                            00000090
+receive                           00000059
+repeat                            00000087
+rowCode                           0000002B
+rowCount                          0000002C
+rowMask                           0000002A
+scanCode                          0000002D
+scanExit                          0000005E
+scrollExit                        000000CE
+send8                             0000009C
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-20-2022  3:46:30         PAGE 30
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+spbrgVal                          .25
+store1                            00000025
+store2                            00000026
+
+Errors   :     0
+Warnings :     2 reported,     0 suppressed
+Messages :    10 reported,     0 suppressed
+
+

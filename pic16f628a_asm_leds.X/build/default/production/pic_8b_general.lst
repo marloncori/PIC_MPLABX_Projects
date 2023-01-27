@@ -1,0 +1,474 @@
+MPASM 5.75                PIC_8B_GENERAL.ASM   9-26-2022  19:56:20         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 
+                      00002 ;*******************************************************************************
+                      00003 
+                      00004 ; Assembly source line config statements
+                      00005 
+                      00006 #include "p16f628a.inc"
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Jul 02 2017
+                      00005 ;  MPASM PIC16F628A processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00386         LIST
+                      00007 
+                      00008 ;*******************************************************************************
+                      00009 ;
+                      00010 ; TODO Step #2 - Configuration Word Setup
+                      00011 ;
+                      00012 ; The 'CONFIG' directive is used to embed the configuration word within the
+                      00013 ; .asm file. MPLAB X requires users to embed their configuration words
+                      00014 ; into source code.  See the device datasheet for additional information
+                      00015 ; on configuration word settings.  Device configuration bits descriptions
+                      00016 ; are in C:\Program Files\Microchip\MPLABX\mpasmx\P<device_name>.inc
+                      00017 ; (may change depending on your MPLAB X installation directory).
+                      00018 ;
+                      00019 ; MPLAB X has a feature which generates configuration bits source code.  Go to
+                      00020 ; Window > PIC Memory Views > Configuration Bits.  Configure each field as
+                      00021 ; needed and select 'Generate Source Code to Output'.  The resulting code which
+                      00022 ; appears in the 'Output Window' > 'Config Bits Source' tab may be copied
+                      00023 ; below.
+                      00024 ;
+                      00025 ;*******************************************************************************
+                      00026 
+                      00027 ; TODO INSERT CONFIG HERE
+                      00028 ; __config 0xFF19
+2007   3F19           00029  __CONFIG _FOSC_INTOSCCLK & _WDTE_OFF & _PWRTE_OFF & _MCLRE_OFF & _BOREN_OFF & _LVP_OFF & _CPD_OFF & _CP
+                            _OFF
+                      00030 
+                      00031 ;*******************************************************************************
+                      00032 ;
+                      00033 ; TODO Step #3 - Variable Definitions
+                      00034 ;
+                      00035 ; Refer to datasheet for available data memory (RAM) organization assuming
+                      00036 ; relocatible code organization (which is an option in project
+                      00037 ; properties > mpasm (Global Options)).  Absolute mode generally should
+                      00038 ; be used sparingly.
+                      00039 ;
+                      00040 ; Example of using GPR Uninitialized Data
+                      00041 ;
+                      00042 ;   GPR_VAR        UDATA
+MPASM 5.75                PIC_8B_GENERAL.ASM   9-26-2022  19:56:20         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00043 ;   MYVAR1         RES        1      ; User variable linker places
+                      00044 ;   MYVAR2         RES        1      ; User variable linker places
+                      00045 ;   MYVAR3         RES        1      ; User variable linker places
+                      00046 ;
+                      00047 ;   ; Example of using Access Uninitialized Data Section (when available)
+                      00048 ;   ; The variables for the context saving in the device datasheet may need
+                      00049 ;   ; memory reserved here.
+                      00050 ;   INT_VAR        UDATA_ACS
+                      00051 ;   W_TEMP         RES        1      ; w register for context saving (ACCESS)
+                      00052 ;   STATUS_TEMP    RES        1      ; status used for context saving
+                      00053 ;   BSR_TEMP       RES        1      ; bank select used for ISR context saving
+                      00054 ;
+                      00055 ;*******************************************************************************
+                      00056 
+                      00057 ; TODO PLACE VARIABLE DEFINITIONS GO HERE
+                      00058  #define BANK0  BCF STATUS,RP0
+                      00059  #define BANK1  BSF STATUS,RP0
+                      00060 
+                      00061  CBLOCK     H'20'
+  00000020            00062     COUNT1
+  00000021            00063     COUNT2
+                      00064  ENDC
+                      00065 ;*******************************************************************************
+                      00066 ; Reset Vector
+                      00067 ;*******************************************************************************
+                      00068 
+                      00069 RES_VECT  CODE    0x0000            ; processor reset vector
+0000   2???           00070     GOTO    START                   ; go to beginning of program
+                      00071 
+                      00072 ;*******************************************************************************
+                      00073 ; TODO Step #4 - Interrupt Service Routines
+                      00074 ;
+                      00075 ; There are a few different ways to structure interrupt routines in the 8
+                      00076 ; bit device families.  On PIC18's the high priority and low priority
+                      00077 ; interrupts are located at 0x0008 and 0x0018, respectively.  On PIC16's and
+                      00078 ; lower the interrupt is at 0x0004.  Between device families there is subtle
+                      00079 ; variation in the both the hardware supporting the ISR (for restoring
+                      00080 ; interrupt context) as well as the software used to restore the context
+                      00081 ; (without corrupting the STATUS bits).
+                      00082 ;
+                      00083 ; General formats are shown below in relocatible format.
+                      00084 ;
+                      00085 ;------------------------------PIC16's and below--------------------------------
+                      00086 ;
+                      00087 ; ISR       CODE    0x0004           ; interrupt vector location
+                      00088 ;
+                      00089 ;     <Search the device datasheet for 'context' and copy interrupt
+                      00090 ;     context saving code here.  Older devices need context saving code,
+                      00091 ;     but newer devices like the 16F#### don't need context saving code.>
+                      00092 ;
+                      00093 ;     RETFIE
+                      00094 ;
+                      00095 ;----------------------------------PIC18's--------------------------------------
+MPASM 5.75                PIC_8B_GENERAL.ASM   9-26-2022  19:56:20         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00096 ;
+                      00097 ; ISRHV     CODE    0x0008
+                      00098 ;     GOTO    HIGH_ISR
+                      00099 ; ISRLV     CODE    0x0018
+                      00100 ;     GOTO    LOW_ISR
+                      00101 ;
+                      00102 ; ISRH      CODE                     ; let linker place high ISR routine
+                      00103 ; HIGH_ISR
+                      00104 ;     <Insert High Priority ISR Here - no SW context saving>
+                      00105 ;     RETFIE  FAST
+                      00106 ;
+                      00107 ; ISRL      CODE                     ; let linker place low ISR routine
+                      00108 ; LOW_ISR
+                      00109 ;       <Search the device datasheet for 'context' and copy interrupt
+                      00110 ;       context saving code here>
+                      00111 ;     RETFIE
+                      00112 ;
+                      00113 ;*******************************************************************************
+                      00114 
+                      00115 ; TODO INSERT ISR HERE
+                      00116         ORG         H'0004'
+0004   0009           00117         RETFIE
+                      00118 ;*******************************************************************************
+                      00119 ; MAIN PROGRAM
+                      00120 ;*******************************************************************************
+                      00121 
+                      00122 MAIN_PROG CODE                      ; let linker place main program
+                      00123 
+0000                  00124 START
+                      00125 
+                      00126     ; TODO Step #5 - Insert Your Program Here
+0000   1683           00127         BANK1
+0001   3000           00128         MOVLW       H'00'           ; your instructions
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0002   0086           00129         MOVWF       TRISB           ; output
+                      00130 
+0003                  00131 TOGGLE
+0003   1283           00132         BANK0
+0004   3055           00133         MOVLW       H'55'
+0005   0086           00134         MOVWF       PORTB           ; b'00001010
+0006   2???           00135         CALL        DELAY500ms
+                      00136         
+0007   30AA           00137         MOVLW       H'AA'
+0008   0086           00138         MOVWF       PORTB           ; b'00001010
+0009   2???           00139         CALL        DELAY500ms
+                      00140         
+000A   300F           00141         MOVLW       H'0F'
+000B   0086           00142         MOVWF       PORTB           ; b'00001010
+000C   2???           00143         CALL        DELAY500ms
+                      00144         
+000D   30F0           00145         MOVLW       H'F0'
+000E   0086           00146         MOVWF       PORTB           ; b'00001010
+000F   2???           00147         CALL        DELAY500ms
+MPASM 5.75                PIC_8B_GENERAL.ASM   9-26-2022  19:56:20         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0010   2???           00148         GOTO        TOGGLE
+                      00149 ; ====================================================================
+                      00150 ;       SUBROUTINE
+                      00151 ; ====================================================================
+0011                  00152 DELAY_AUX
+0011   30C8           00153         MOVLW       D'200'
+0012   00A0           00154         MOVWF       COUNT1
+                      00155 
+0013                  00156 CLOOP
+0013   0000           00157         NOP
+0014   0000           00158         NOP
+0015   0BA0           00159         DECFSZ      COUNT1,1
+0016   2???           00160         GOTO        CLOOP
+0017   0008           00161         RETURN 
+                      00162 
+                      00163 ; -- NEARLY 500 ms DELAY
+0018                  00164 DELAY500ms
+0018   3064           00165         MOVLW       D'100'
+0019   00A1           00166         MOVWF       COUNT2
+                      00167 
+001A                  00168 DLOOP
+001A   2???           00169         CALL        DELAY_AUX
+001B   0BA1           00170         DECFSZ      COUNT2,1
+001C   2???           00171         GOTO        DLOOP
+                      00172         
+001D   0008           00173         RETURN
+                      00174 ; ====================================================================
+3F19                  00175         END
+MPASM 5.75                PIC_8B_GENERAL.ASM   9-26-2022  19:56:20         PAGE  5
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ADDEN                             00000003
+ADEN                              00000003
+BANK0                             BCF STATUS,RP0
+BANK1                             BSF STATUS,RP0
+BRGH                              00000002
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCPR1                             00000015
+CCPR1H                            00000016
+CCPR1L                            00000015
+CIS                               00000003
+CLOOP                             00000013
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000001F
+CMIE                              00000006
+CMIF                              00000006
+COUNT1                            00000020
+COUNT2                            00000021
+CREN                              00000004
+CSRC                              00000007
+DATA_CP_OFF                       00003FFF
+DATA_CP_ON                        00003EFF
+DC                                00000001
+DELAY500ms                        00000018
+DELAY_AUX                         00000011
+DLOOP                             0000001A
+EEADR                             0000009B
+EECON1                            0000009C
+EECON2                            0000009D
+EEDATA                            0000009A
+EEIE                              00000007
+EEIF                              00000007
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+GIE                               00000007
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+MPASM 5.75                PIC_8B_GENERAL.ASM   9-26-2022  19:56:20         PAGE  6
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+NOT_BO                            00000000
+NOT_BOD                           00000000
+NOT_BOR                           00000000
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+OERR                              00000001
+OPTION_REG                        00000081
+OSCF                              00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PIE1                              0000008C
+PIR1                              0000000C
+PORTA                             00000005
+PORTB                             00000006
+PR2                               00000092
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RA6                               00000006
+RA7                               00000007
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+RP0                               00000005
+RP1                               00000006
+RX9                               00000006
+MPASM 5.75                PIC_8B_GENERAL.ASM   9-26-2022  19:56:20         PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RX9D                              00000000
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+START                             00000000
+STATUS                            00000003
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1OSCEN                           00000003
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOGGLE                            00000003
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISA5                            00000005
+TRISA6                            00000006
+TRISA7                            00000007
+TRISB                             00000086
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+MPASM 5.75                PIC_8B_GENERAL.ASM   9-26-2022  19:56:20         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TRISB6                            00000006
+TRISB7                            00000007
+TRMT                              00000001
+TX9                               00000006
+TX9D                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             0000009F
+VREN                              00000007
+VROE                              00000006
+VRR                               00000005
+W                                 00000000
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_OFF                           00003FFF
+_CP_ON                            00001FFF
+_DEVID1                           00002006
+_ER_OSC_CLKOUT                    00003FFF
+_ER_OSC_NOCLKOUT                  00003FFE
+_EXTCLK_OSC                       00003FEF
+_FOSC_ECIO                        00003FEF
+_FOSC_EXTRCCLK                    00003FFF
+_FOSC_EXTRCIO                     00003FFE
+_FOSC_HS                          00003FEE
+_FOSC_INTOSCCLK                   00003FFD
+_FOSC_INTOSCIO                    00003FFC
+_FOSC_LP                          00003FEC
+_FOSC_XT                          00003FED
+_HS_OSC                           00003FEE
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_INTOSC_OSC_CLKOUT                00003FFD
+_INTOSC_OSC_NOCLKOUT              00003FFC
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+MPASM 5.75                PIC_8B_GENERAL.ASM   9-26-2022  19:56:20         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_LP_OSC                           00003FEC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC_CLKOUT                    00003FFF
+_RC_OSC_NOCLKOUT                  00003FFE
+_WDTE_OFF                         00003FFB
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FED
+__16F628A                         00000001
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     1 reported,     0 suppressed
+
+

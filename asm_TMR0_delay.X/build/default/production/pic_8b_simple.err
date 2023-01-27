@@ -1,0 +1,16 @@
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 58 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 60 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 92 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 92 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 93 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 93 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 103 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 103 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 108 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 108 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 130 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 130 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 134 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 134 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 138 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_DELAY.X\PIC_8B_SIMPLE.ASM 138 : Register in operand not in bank 0.  Ensure that bank bits are correct.

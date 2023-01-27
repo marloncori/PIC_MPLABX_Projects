@@ -1,0 +1,13 @@
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT_TMR0.X\PIC_8B_GENERAL.ASM 19 : Found directive in column 1. (CBLOCK)
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT_TMR0.X\PIC_8B_GENERAL.ASM 23 : Found directive in column 1. (ENDC)
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT_TMR0.X\PIC_8B_GENERAL.ASM 45 : Found label after column 1. (REPEAT)
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT_TMR0.X\PIC_8B_GENERAL.ASM 51 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT_TMR0.X\PIC_8B_GENERAL.ASM 53 : Using default destination of 1 (file).
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT_TMR0.X\PIC_8B_GENERAL.ASM 71 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT_TMR0.X\PIC_8B_GENERAL.ASM 74 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT_TMR0.X\PIC_8B_GENERAL.ASM 75 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT_TMR0.X\PIC_8B_GENERAL.ASM 76 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT_TMR0.X\PIC_8B_GENERAL.ASM 77 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT_TMR0.X\PIC_8B_GENERAL.ASM 78 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT_TMR0.X\PIC_8B_GENERAL.ASM 80 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_INTERRUPT_TMR0.X\PIC_8B_GENERAL.ASM 81 : Register in operand not in bank 0.  Ensure that bank bits are correct.

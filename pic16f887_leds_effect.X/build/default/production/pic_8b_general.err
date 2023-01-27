@@ -1,0 +1,6 @@
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LEDS_EFFECT.X\PIC_8B_GENERAL.ASM 45 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LEDS_EFFECT.X\PIC_8B_GENERAL.ASM 54 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LEDS_EFFECT.X\PIC_8B_GENERAL.ASM 56 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LEDS_EFFECT.X\PIC_8B_GENERAL.ASM 61 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LEDS_EFFECT.X\PIC_8B_GENERAL.ASM 63 : Using default destination of 1 (file).
+Warning[202] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_LEDS_EFFECT.X\PIC_8B_GENERAL.ASM 79 : Argument out of range.  Least significant bits used.

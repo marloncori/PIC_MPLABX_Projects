@@ -1,0 +1,85 @@
+[p LITE_MODE AUTOSTATIC PIC14 PICREGULAR PICMID ]
+[d version 1.1 ]
+[d edition pro ]
+[d chip 16F873A ]
+[d frameptr 6 ]
+"62 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\common\float.c
+[v ___ftpack __ftpack `(f  1 e 3 0 ]
+"86 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\common\ftadd.c
+[v ___ftadd __ftadd `(f  1 e 3 0 ]
+"6 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\pic\eeprom.c
+[v _eecpymem eecpymem `(v  1 e 1 0 ]
+"39
+[v _memcpyee memcpyee `(v  1 e 1 0 ]
+"27 C:\Users\NUC\MPLABXProjects\pic16f873a_timer_blink8.X\main.c
+[v _toggle_ISR toggle_ISR `II(v  1 e 1 0 ]
+"39
+[v _main main `(v  1 e 1 0 ]
+"49
+[v _initialize initialize `(v  1 e 1 0 ]
+"55
+[v _blink_next_led blink_next_led `(v  1 e 1 0 ]
+[v i1_blink_next_led blink_next_led `(v  1 e 1 0 ]
+"63
+[v _interrupt_init interrupt_init `(v  1 e 1 0 ]
+"55 C:\Program Files (x86)\Microchip\xc8\v1.36\include\pic16f873a.h
+[v _TMR0 TMR0 `VEuc  1 e 1 @1 ]
+"160
+[v _PORTA PORTA `VEuc  1 e 1 @5 ]
+"270
+[v _PORTC PORTC `VEuc  1 e 1 @7 ]
+[s S19 . 1 `uc 1 RBIF 1 0 :1:0 
+`uc 1 INTF 1 0 :1:1 
+`uc 1 TMR0IF 1 0 :1:2 
+`uc 1 RBIE 1 0 :1:3 
+`uc 1 INTE 1 0 :1:4 
+`uc 1 TMR0IE 1 0 :1:5 
+`uc 1 PEIE 1 0 :1:6 
+`uc 1 GIE 1 0 :1:7 
+]
+"373
+[s S28 . 1 `uc 1 . 1 0 :2:0 
+`uc 1 T0IF 1 0 :1:2 
+`uc 1 . 1 0 :2:3 
+`uc 1 T0IE 1 0 :1:5 
+]
+[u S33 . 1 `S19 1 . 1 0 `S28 1 . 1 0 ]
+[v _INTCONbits INTCONbits `VES33  1 e 1 @11 ]
+"1121
+[v _OPTION_REG OPTION_REG `VEuc  1 e 1 @129 ]
+"1190
+[v _TRISA TRISA `VEuc  1 e 1 @133 ]
+"1815
+[v _CMCON CMCON `VEuc  1 e 1 @156 ]
+"25 C:\Users\NUC\MPLABXProjects\pic16f873a_timer_blink8.X\main.c
+[v _counter counter `ui  1 e 2 0 ]
+"39
+[v _main main `(v  1 e 1 0 ]
+{
+"47
+} 0
+"63
+[v _interrupt_init interrupt_init `(v  1 e 1 0 ]
+{
+"85
+} 0
+"49
+[v _initialize initialize `(v  1 e 1 0 ]
+{
+"53
+} 0
+"55
+[v _blink_next_led blink_next_led `(v  1 e 1 0 ]
+{
+"61
+} 0
+"27
+[v _toggle_ISR toggle_ISR `II(v  1 e 1 0 ]
+{
+"37
+} 0
+"55
+[v i1_blink_next_led blink_next_led `(v  1 e 1 0 ]
+{
+"61
+} 0

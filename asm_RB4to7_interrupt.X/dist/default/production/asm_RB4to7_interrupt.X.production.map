@@ -1,0 +1,62 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Mon Oct 17 23:19:26 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_0       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x000096
+.config_2007_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002007    program   0x000002
+.config_2008_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002008    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x00004f      
+                            0x002007    0x002008      
+            81 out of 8455 program addresses used, program memory utilization is 0%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                       D1   0x000045    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                    Delay   0x000043    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                  IntServ   0x000020    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                    Jloop   0x00004a    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                    Kloop   0x00004b    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                LongDelay   0x000048    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                     MAIN   0x00001e    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+               bit4Change   0x00002d    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+               bit7Change   0x000032    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+               btnRelease   0x000036    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                  exitISR   0x00003b    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                  notRBIF   0x000041    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                     MAIN   0x00001e    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                  IntServ   0x000020    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+               bit4Change   0x00002d    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+               bit7Change   0x000032    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+               btnRelease   0x000036    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                  exitISR   0x00003b    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                  notRBIF   0x000041    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                    Delay   0x000043    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                       D1   0x000045    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                LongDelay   0x000048    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                    Jloop   0x00004a    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+                    Kloop   0x00004b    program     static C:\Users\NUC\MPLABXProjects\asm_RB4to7_interrupt.X\pic_8b_general.asm
+
+

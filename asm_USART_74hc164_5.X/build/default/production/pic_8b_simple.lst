@@ -1,0 +1,523 @@
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-19-2022  22:41:30         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;*******************************************************************************
+                      00002 ;
+                      00003 ;   Originally this code was for pic16f84a running at 4MHz. 
+                      00004 ;   It comminucates with 74HC164 and 74HC165 shift registers. 
+                      00005 ;
+                      00006 ; DESCRIPTION:
+                      00007 ;   The 74HC165 inputs 8 lines from a DIP switch and transmits settings to
+                      00008 ;   PIC through a serial line. PIC sends data serially to an 74HC164 which
+                      00009 ;   is wired to 8 LEDS that display the received data. A total of 6 PIC lines
+                      00010 ;   are used in interfacing 8 input switches to 8 output LEDS.
+                      00011 ;
+                      00012 ; CIRCUIT: 
+                      00013 ;   * RA0 is the serial transmission line which comes from the 74HC165
+                      00014 ;   * RA1 is wired to the 74HC164 CLOCK pin
+                      00015 ;   * RA2 is wired to the 74HC164 CLEAR pin
+                      00016 ;   * 74HC164 output pins 0 to 7 are wired to LEDS
+                      00017 ;   * RB0 is wired to the 74HC165 Hout line
+                      00018 ;   * RB1 is wired to the 74HC165 CLK line
+                      00019 ;   * RB2 is wired to the 74HC165 load line
+                      00020 ;   * a pushbutton switch is in the pic16f84 RESET line
+                      00021 ;     and serve to restart the program
+                      00022 ;
+                      00023 ; PROTOCOL:
+                      00024 ;   Communicatin between PIC and the 74HC164 and 74HC165 is synchronous since
+                      00025 ;   the shift registers clock lines serve to shift in and out the data bits.
+                      00026 ;    
+                      00027 ;*******************************************************************************
+                      00028 #include "p16f628a.inc"
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Jul 02 2017
+                      00005 ;  MPASM PIC16F628A processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00386         LIST
+                      00029 
+                      00030 ;*******************************************************************************
+                      00031 ; __config 0xFF19
+2007   3F19           00032  __CONFIG _FOSC_INTOSCCLK & _WDTE_OFF & _PWRTE_OFF & _MCLRE_OFF & _BOREN_OFF & _LVP_OFF & _CPD_OFF & _CP
+                            _OFF
+                      00033 
+                      00034 ;*******************************************************************************
+                      00035 Bank0   MACRO                           ; select RAM bank 0
+                      00036         bcf     STATUS, RP0
+                      00037         ENDM
+                      00038 ;------------------------------------------------------------
+                      00039 Bank1   MACRO                           ; select RAM bank 1
+                      00040         bsf     STATUS, RP0
+                      00041         ENDM    
+                      00042 ;*******************************************************************************
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-19-2022  22:41:30         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00043 ; Constant definitions for pin wiring
+                      00044 ;*******************************************************************************
+                      00045 #define clk74HC164   RA1
+                      00046 #define clr74HC164   RA2
+                      00047 #define data74HC164  RA0
+                      00048 ;
+                      00049 #define clk74HC165   RB1
+                      00050 #define load74HC165  RB2
+                      00051         
+                      00052 ;*******************************************************************************
+                      00053 ; PIC register flag equates
+                      00054 ;*******************************************************************************
+  00000007            00055 MSB         EQU     7                   ; high order bit
+                      00056             
+                      00057 ;*******************************************************************************
+                      00058 ; Variables defined in PIC RAM
+                      00059 ;*******************************************************************************
+Warning[205]: Found directive in column 1. (CBLOCK)
+                      00060 CBLOCK      H'20'
+  00000020            00061    bitCount                             ; a counter for eight bits
+  00000021            00062    dataReg                              ; data to be sent through USART
+  00000022            00063    accuReg                              ; accumulator register for bit shifts
+  00000023            00064    temp
+Warning[205]: Found directive in column 1. (ENDC)
+                      00065 ENDC        
+                      00066 ;*******************************************************************************
+                      00067 ; Reset Vector
+                      00068 ;*******************************************************************************
+                      00069 RES_VECT  CODE    0x0000            ; processor reset vector
+0000   2???           00070     GOTO    START                   ; go to beginning of program
+                      00071 
+                      00072 ;*******************************************************************************
+                      00073 ; INSERT ISR HERE
+Warning[207]: Found label after column 1. (ISR)
+                      00074      ISR     CODE    0x0004           ; interrupt vector location
+0004   0009           00075      RETFIE   
+                      00076 ;*******************************************************************************
+                      00077 ; MAIN PROGRAM
+                      00078 ;*******************************************************************************
+                      00079 
+                      00080 MAIN_PROG CODE                      ; let linker place main program
+                      00081 
+0000                  00082 START
+                      00083 
+                      00084     Bank1
+0000   1683               M         bsf     STATUS, RP0
+0001   3000           00085     MOVLW   H'00'                   ; portA as output
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0002   0085           00086     MOVWF   TRISA                   ; 
+0003   3001           00087     MOVLW   H'01'                   ; pin 0 is input
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0004   0086           00088     MOVWF   TRISB                   ; the rest is output
+                      00089     
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-19-2022  22:41:30         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00090     Bank0
+0005   1283               M         bcf     STATUS, RP0
+0006   3004           00091     MOVLW   H'04'                   ; make sure PORTA line 2
+0007   0085           00092     MOVWF   PORTA                   ; is set to high state (clear line)
+                      00093     
+                      00094 ;*****************************;
+                      00095 ;  read input from 74HC165 IC ;
+                      00096 ;*****************************;
+0008   2???           00097     CALL    in_74HC165              ; at this point dataReg contains input
+                      00098     
+                      00099 ;***********************************;
+                      00100 ;   invoke serial output procedure  ; 
+                      00101 ;***********************************;
+0009   2???           00102     CALL    out_74HC164             ; send data to second register shift
+                      00103     
+                      00104 ;***************;
+                      00105 ;  wait forever ;
+                      00106 ;***************;
+000A                  00107 endLoop
+000A   2???           00108     GOTO    endLoop
+                      00109 
+                      00110 ;*******************************************************************************
+                      00111 ;   74HC164 IC SUBROUTINE to send serial data
+                      00112 ;*******************************************************************************
+                      00113 ; ON ENTRY:
+                      00114 ;       local variable dataReg holds 8-bit value to be transmitted through
+                      00115 ;       port labeled serialLN
+                      00116 ;
+                      00117 ; OPERATION:
+                      00118 ;     1. a local counter (bitCount) is initialized to eight bits.
+                      00119 ;     2. first bit is assumed to be zero by setting the data line 
+                      00120 ;        low. Then the high-order bit in the data register (dataReg) is tested.
+                      00121 ;        If set, the data ilne is changed to HIGH
+                      00122 ;     3. bits are shifted by pulsing the 74HC164 clock line (CLK).
+                      00123 ;     4. data line are then shifted left and the bit counter is tested.
+                      00124 ;        If all eight bits have been sent, the procedure returns.
+                      00125 ; ------------------------------------------------------------------------------
+000B                  00126 out_74HC164
+000B   1105           00127     BCF     PORTA, clr74HC164       ; clear shit register
+000C   1505           00128     BSF     PORTA, clr74HC164       ; then set clear line to HIGH again
+                      00129     
+000D   3008           00130     MOVLW   H'08'
+000E   00A0           00131     MOVWF   bitCount                ; initialize counter
+                      00132 ;------------------------------------------------------------------------------
+000F                  00133 sendBit
+000F   1005           00134     BCF     PORTA, data74HC164      ; set data line low (assume)
+                      00135     ; using this assumption is possible because the bit is not
+                      00136     ; shifted in untill the clock line is pulsed.
+0010   1BA1           00137     BTFSC   dataReg, MSB            ; test number bit 7
+0011   1405           00138     BSF     PORTA, data74HC164      ; change assumption if set
+                      00139     
+                      00140 ;*******************;
+                      00141 ;  pulse clock line ;
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-19-2022  22:41:30         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00142 ;*******************;-----------;
+                      00143     ; bits will be shifted here ;
+                      00144     ;---------------------------;
+0012   1405           00145     BSF     PORTA, data74HC164      ; HIGH
+0013   1005           00146     BCF     PORTA, data74HC164      ; CLK pin is LOW now
+                      00147     
+                      00148 ;************************;
+                      00149 ;  rotate data bits left ;
+                      00150 ;************************;
+0014   0DA1           00151     RLF     dataReg, F              ; shift left data bits
+0015   0BA0           00152     DECFSZ  bitCount, F             ; decrement bit counter
+0016   2???           00153     GOTO    sendBit                 ; repeat if not 8 bits
+                      00154     
+                      00155 ;***********************;    
+                      00156 ;  end of transmission  ;
+                      00157 ;***********************;    
+0017   0008           00158     RETURN 
+                      00159     
+                      00160 ;******************************************;
+                      00161 ;   74HC165 IC SUBROUTINE to read parallel ;
+                      00162 ;       data and send serially to PIC      ;
+                      00163 ;******************************************;------------------------------;
+                      00164 ;                                                                         ; 
+                      00165 ; OPERATION:                                                              ;
+                      00166 ;     1. eight DIP switches are connected to the input ports of an        ;
+                      00167 ;        74HC165 IC. Its output line Hout and its control lines CLK       ;
+                      00168 ;        and LOAD are connected to the PIC's portb lines 0, 1, and 2.     ;
+                      00169 ;        low. Then the high-order bit in the data register (dataReg)      ;
+                      00170 ;     2. procedure sets a counter (bitCount) for eight iterations and     ;                 ;
+                      00171 ;        clears a data holding register (dataReg)                         ;
+                      00172 ;     3. PORTB bits are read into W and only the LSB of PORTB is relevant ;
+                      00173 ;        This value is stored in a working register and the meaningful    ;
+                      00174 ;        bit is rotated into the carry flag, then the carry flag bit is   ;
+                      00175 ;        then sifted into the data register.                              ;
+                      00176 ;     4. the iteration counter is decremented. If this is the last        ;
+                      00177 ;        iteration the routine ends. Otherwise the bitwise read-and-write ;
+                      00178 ;        operation is repeated.                                           ; 
+                      00179 ; ------------------------------------------------------------------------;
+0018                  00180 in_74HC165
+0018   01A1           00181     CLRF    dataReg                     ; clear data register
+0019   3008           00182     MOVLW   H'08'                       ; initialize counter
+001A   00A0           00183     MOVWF   bitCount                    ; 
+001B   1106           00184     BCF     PORTB, load74HC165          ; reset shift register
+001C   1506           00185     BSF     PORTB, load74HC165
+                      00186 
+001D                  00187 nextBit
+001D   0806           00188     MOVF    PORTB, W                    ; read PORTB, only LSB are needed
+001E   00A2           00189     MOVWF   accuReg                     ; store value in local register
+                      00190                                         
+001F   0CA2           00191     RRF     accuReg, F                  ; rotate LSB bit into carry flag
+0020   0DA1           00192     RLF     dataReg, F                  ; carry flag value into dataReg
+0021   0BA0           00193     DECFSZ  bitCount, F                 ; decrement bit counter
+0022   2???           00194     GOTO    shiftBits                   ; continue if not zero
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-19-2022  22:41:30         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0023   0008           00195     RETURN                              ; otherwise, end procedure
+                      00196     
+0024                  00197 shiftBits
+0024   1486           00198     BSF     PORTB, clk74HC165           ; pulse clock, line to HIGH
+0025   1086           00199     BCF     PORTB, clk74HC165           ; line to LOW state
+0026   2???           00200     GOTO    nextBit                     ; continue
+                      00201     
+                      00202 ;*******************************************************************************
+3F19                  00203     END
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-19-2022  22:41:30         PAGE  6
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ADDEN                             00000003
+ADEN                              00000003
+BRGH                              00000002
+Bank0                             
+Bank1                             
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCPR1                             00000015
+CCPR1H                            00000016
+CCPR1L                            00000015
+CIS                               00000003
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000001F
+CMIE                              00000006
+CMIF                              00000006
+CREN                              00000004
+CSRC                              00000007
+DATA_CP_OFF                       00003FFF
+DATA_CP_ON                        00003EFF
+DC                                00000001
+EEADR                             0000009B
+EECON1                            0000009C
+EECON2                            0000009D
+EEDATA                            0000009A
+EEIE                              00000007
+EEIF                              00000007
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+GIE                               00000007
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+MSB                               00000007
+NOT_BO                            00000000
+NOT_BOD                           00000000
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-19-2022  22:41:30         PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+NOT_BOR                           00000000
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+OERR                              00000001
+OPTION_REG                        00000081
+OSCF                              00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PIE1                              0000008C
+PIR1                              0000000C
+PORTA                             00000005
+PORTB                             00000006
+PR2                               00000092
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RA6                               00000006
+RA7                               00000007
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+RP0                               00000005
+RP1                               00000006
+RX9                               00000006
+RX9D                              00000000
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+START                             00000000
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-19-2022  22:41:30         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+STATUS                            00000003
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1OSCEN                           00000003
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISA5                            00000005
+TRISA6                            00000006
+TRISA7                            00000007
+TRISB                             00000086
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+TRMT                              00000001
+TX9                               00000006
+TX9D                              00000000
+TXEN                              00000005
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-19-2022  22:41:30         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             0000009F
+VREN                              00000007
+VROE                              00000006
+VRR                               00000005
+W                                 00000000
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_OFF                           00003FFF
+_CP_ON                            00001FFF
+_DEVID1                           00002006
+_ER_OSC_CLKOUT                    00003FFF
+_ER_OSC_NOCLKOUT                  00003FFE
+_EXTCLK_OSC                       00003FEF
+_FOSC_ECIO                        00003FEF
+_FOSC_EXTRCCLK                    00003FFF
+_FOSC_EXTRCIO                     00003FFE
+_FOSC_HS                          00003FEE
+_FOSC_INTOSCCLK                   00003FFD
+_FOSC_INTOSCIO                    00003FFC
+_FOSC_LP                          00003FEC
+_FOSC_XT                          00003FED
+_HS_OSC                           00003FEE
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_INTOSC_OSC_CLKOUT                00003FFD
+_INTOSC_OSC_NOCLKOUT              00003FFC
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FEC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+_PWRTE_OFF                        00003FFF
+MPASM 5.75                 PIC_8B_SIMPLE.ASM   10-19-2022  22:41:30         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_PWRTE_ON                         00003FF7
+_RC_OSC_CLKOUT                    00003FFF
+_RC_OSC_NOCLKOUT                  00003FFE
+_WDTE_OFF                         00003FFB
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FED
+__16F628A                         00000001
+accuReg                           00000022
+bitCount                          00000020
+clk74HC164                        RA1
+clk74HC165                        RB1
+clr74HC164                        RA2
+data74HC164                       RA0
+dataReg                           00000021
+endLoop                           0000000A
+in_74HC165                        00000018
+load74HC165                       RB2
+nextBit                           0000001D
+out_74HC164                       0000000B
+sendBit                           0000000F
+shiftBits                         00000024
+temp                              00000023
+
+Errors   :     0
+Warnings :     3 reported,     0 suppressed
+Messages :     2 reported,     0 suppressed
+
+

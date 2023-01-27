@@ -1,0 +1,51 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Tue Sep 27 00:33:20 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_0       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x00005e
+.config_2007_BUILD/DEFAULT/PRODUCTION/NEW_PIC       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x000033      
+                            0x002007    0x002007      
+            52 out of 8454 program addresses used, program memory utilization is 0%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    CLOOP   0x000021    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+               DELAY500ms   0x00002d    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+               DELAY_AUX1   0x00001f    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+               DELAY_AUX2   0x000026    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+                    DLOOP   0x000028    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+                    ELOOP   0x00002f    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+                   TOGGLE   0x000008    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+                   TOGGLE   0x000008    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+               DELAY_AUX1   0x00001f    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+                    CLOOP   0x000021    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+               DELAY_AUX2   0x000026    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+                    DLOOP   0x000028    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+               DELAY500ms   0x00002d    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+                    ELOOP   0x00002f    program     static C:\Users\NUC\MPLABXProjects\pic16f876a_asm_toggle.X\new_pic_8b_general.asm
+
+

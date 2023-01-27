@@ -1,0 +1,25 @@
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 60 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 62 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 70 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 71 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 75 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 109 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 109 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 113 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 113 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 117 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 117 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 132 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 132 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 135 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 135 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 142 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 142 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 145 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 145 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 159 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 159 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 161 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 161 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Warning[219] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 162 : Invalid RAM location specified.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_TMR0_INTERRUPT.X\PIC_8B_SIMPLE.ASM 162 : Register in operand not in bank 0.  Ensure that bank bits are correct.

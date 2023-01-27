@@ -1,0 +1,7 @@
+Message[301] C:\PROGRAM FILES (X86)\MICROCHIP\MPLABX\V4.01\MPASMX\P16F628A.INC 34 : MESSAGE: (Processor-header file mismatch.  Verify selected processor.)
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\ASM_USART_RECEIVER.X\PIC_8B_SIMPLE.ASM 59 : Found directive in column 1. (CBLOCK)
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\ASM_USART_RECEIVER.X\PIC_8B_SIMPLE.ASM 63 : Found directive in column 1. (ENDC)
+Warning[207] C:\USERS\NUC\MPLABXPROJECTS\ASM_USART_RECEIVER.X\PIC_8B_SIMPLE.ASM 72 : Found label after column 1. (ISR)
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_USART_RECEIVER.X\PIC_8B_SIMPLE.ASM 84 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_USART_RECEIVER.X\PIC_8B_SIMPLE.ASM 86 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\ASM_USART_RECEIVER.X\PIC_8B_SIMPLE.ASM 103 : Register in operand not in bank 0.  Ensure that bank bits are correct.

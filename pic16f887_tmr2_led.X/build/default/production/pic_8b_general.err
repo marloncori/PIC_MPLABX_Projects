@@ -1,0 +1,9 @@
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TMR2_LED.X\PIC_8B_GENERAL.ASM 41 : Found directive in column 1. (CBLOCK)
+Warning[205] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TMR2_LED.X\PIC_8B_GENERAL.ASM 47 : Found directive in column 1. (ENDC)
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TMR2_LED.X\PIC_8B_GENERAL.ASM 72 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TMR2_LED.X\PIC_8B_GENERAL.ASM 74 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TMR2_LED.X\PIC_8B_GENERAL.ASM 75 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TMR2_LED.X\PIC_8B_GENERAL.ASM 107 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TMR2_LED.X\PIC_8B_GENERAL.ASM 131 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TMR2_LED.X\PIC_8B_GENERAL.ASM 135 : Using default destination of 1 (file).
+Message[305] C:\USERS\NUC\MPLABXPROJECTS\PIC16F887_TMR2_LED.X\PIC_8B_GENERAL.ASM 137 : Using default destination of 1 (file).

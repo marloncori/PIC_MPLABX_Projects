@@ -1,0 +1,47 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Mon Sep 26 19:56:23 2022
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_0       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x00003c
+.config_2007_BUILD/DEFAULT/PRODUCTION/PIC_8B_       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x000022      
+                            0x002007    0x002007      
+            35 out of 2182 program addresses used, program memory utilization is 1%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    CLOOP   0x000018    program     static C:\Users\NUC\MPLABXProjects\pic16f628a_asm_leds.X\pic_8b_general.asm
+               DELAY500ms   0x00001d    program     static C:\Users\NUC\MPLABXProjects\pic16f628a_asm_leds.X\pic_8b_general.asm
+                DELAY_AUX   0x000016    program     static C:\Users\NUC\MPLABXProjects\pic16f628a_asm_leds.X\pic_8b_general.asm
+                    DLOOP   0x00001f    program     static C:\Users\NUC\MPLABXProjects\pic16f628a_asm_leds.X\pic_8b_general.asm
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\pic16f628a_asm_leds.X\pic_8b_general.asm
+                   TOGGLE   0x000008    program     static C:\Users\NUC\MPLABXProjects\pic16f628a_asm_leds.X\pic_8b_general.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    START   0x000005    program     static C:\Users\NUC\MPLABXProjects\pic16f628a_asm_leds.X\pic_8b_general.asm
+                   TOGGLE   0x000008    program     static C:\Users\NUC\MPLABXProjects\pic16f628a_asm_leds.X\pic_8b_general.asm
+                DELAY_AUX   0x000016    program     static C:\Users\NUC\MPLABXProjects\pic16f628a_asm_leds.X\pic_8b_general.asm
+                    CLOOP   0x000018    program     static C:\Users\NUC\MPLABXProjects\pic16f628a_asm_leds.X\pic_8b_general.asm
+               DELAY500ms   0x00001d    program     static C:\Users\NUC\MPLABXProjects\pic16f628a_asm_leds.X\pic_8b_general.asm
+                    DLOOP   0x00001f    program     static C:\Users\NUC\MPLABXProjects\pic16f628a_asm_leds.X\pic_8b_general.asm
+
+

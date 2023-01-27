@@ -1,0 +1,147 @@
+[p LITE_MODE AUTOSTATIC PIC14 PICREGULAR PICMID ]
+[d version 1.1 ]
+[d edition pro ]
+[d chip 16F877A ]
+[d frameptr 6 ]
+"32 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\common\awtoft.c
+[v ___awtoft __awtoft `(f  1 e 3 0 ]
+"62 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\common\float.c
+[v ___ftpack __ftpack `(f  1 e 3 0 ]
+"86 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\common\ftadd.c
+[v ___ftadd __ftadd `(f  1 e 3 0 ]
+"56 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\common\ftdiv.c
+[v ___ftdiv __ftdiv `(f  1 e 3 0 ]
+"62 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\common\ftmul.c
+[v ___ftmul __ftmul `(f  1 e 3 0 ]
+"44 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\common\fttol.c
+[v ___fttol __fttol `(l  1 e 4 0 ]
+"6 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\pic\eeprom.c
+[v _eecpymem eecpymem `(v  1 e 1 0 ]
+"39
+[v _memcpyee memcpyee `(v  1 e 1 0 ]
+"35 C:\Users\NUC\MPLABXProjects\pic16f877a_object_avoider.X\main.c
+[v _back_off back_off `(v  1 e 1 0 ]
+"45
+[v _calculate_distance calculate_distance `(v  1 e 1 0 ]
+"66
+[v _main main `(v  1 e 1 0 ]
+"625 C:\Program Files (x86)\Microchip\xc8\v1.36\include\pic16f877a.h
+[v _TMR1L TMR1L `VEuc  1 e 1 @14 ]
+"631
+[v _TMR1H TMR1H `VEuc  1 e 1 @15 ]
+"637
+[v _T1CON T1CON `VEuc  1 e 1 @16 ]
+"1459
+[v _TRISD TRISD `VEuc  1 e 1 @136 ]
+"2515
+[v _RB1 RB1 `VEb  1 e 0 @49 ]
+"2517
+[v _RB2 RB2 `VEb  1 e 0 @50 ]
+"2541
+[v _RC4 RC4 `VEb  1 e 0 @60 ]
+"2543
+[v _RC5 RC5 `VEb  1 e 0 @61 ]
+"2545
+[v _RC6 RC6 `VEb  1 e 0 @62 ]
+"2547
+[v _RC7 RC7 `VEb  1 e 0 @63 ]
+"2567
+[v _RD2 RD2 `VEb  1 e 0 @66 ]
+"2569
+[v _RD3 RD3 `VEb  1 e 0 @67 ]
+"2659
+[v _TMR1ON TMR1ON `VEb  1 e 0 @128 ]
+"2689
+[v _TRISB1 TRISB1 `VEb  1 e 0 @1073 ]
+"2691
+[v _TRISB2 TRISB2 `VEb  1 e 0 @1074 ]
+"2693
+[v _TRISB3 TRISB3 `VEb  1 e 0 @1075 ]
+"2711
+[v _TRISC4 TRISC4 `VEb  1 e 0 @1084 ]
+"2713
+[v _TRISC5 TRISC5 `VEb  1 e 0 @1085 ]
+"2715
+[v _TRISC6 TRISC6 `VEb  1 e 0 @1086 ]
+"2717
+[v _TRISC7 TRISC7 `VEb  1 e 0 @1087 ]
+"2723
+[v _TRISD2 TRISD2 `VEb  1 e 0 @1090 ]
+"2725
+[v _TRISD3 TRISD3 `VEb  1 e 0 @1091 ]
+"32 C:\Users\NUC\MPLABXProjects\pic16f877a_object_avoider.X\main.c
+[v _time_taken time_taken `i  1 e 2 0 ]
+"33
+[v _distance distance `i  1 e 2 0 ]
+"66
+[v _main main `(v  1 e 1 0 ]
+{
+"130
+} 0
+"45
+[v _calculate_distance calculate_distance `(v  1 e 1 0 ]
+{
+"62
+} 0
+"44 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\common\fttol.c
+[v ___fttol __fttol `(l  1 e 4 0 ]
+{
+"47
+[v ___fttol@lval lval `ul  1 a 4 41 ]
+"46
+[v ___fttol@exp1 exp1 `uc  1 a 1 45 ]
+[v ___fttol@sign1 sign1 `uc  1 a 1 40 ]
+"44
+[v ___fttol@f1 f1 `f  1 p 3 32 ]
+"73
+} 0
+"62 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\common\ftmul.c
+[v ___ftmul __ftmul `(f  1 e 3 0 ]
+{
+"65
+[v ___ftmul@f3_as_product f3_as_product `um  1 a 3 11 ]
+"64
+[v ___ftmul@sign sign `uc  1 a 1 15 ]
+[v ___ftmul@cntr cntr `uc  1 a 1 14 ]
+[v ___ftmul@exp exp `uc  1 a 1 10 ]
+"62
+[v ___ftmul@f1 f1 `f  1 p 3 0 ]
+[v ___ftmul@f2 f2 `f  1 p 3 3 ]
+"157
+} 0
+"56 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\common\ftdiv.c
+[v ___ftdiv __ftdiv `(f  1 e 3 0 ]
+{
+"60
+[v ___ftdiv@f3 f3 `f  1 a 3 27 ]
+"59
+[v ___ftdiv@sign sign `uc  1 a 1 31 ]
+[v ___ftdiv@exp exp `uc  1 a 1 30 ]
+[v ___ftdiv@cntr cntr `uc  1 a 1 26 ]
+"56
+[v ___ftdiv@f2 f2 `f  1 p 3 16 ]
+[v ___ftdiv@f1 f1 `f  1 p 3 19 ]
+"86
+} 0
+"32 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\common\awtoft.c
+[v ___awtoft __awtoft `(f  1 e 3 0 ]
+{
+"34
+[v ___awtoft@sign sign `uc  1 a 1 13 ]
+"32
+[v ___awtoft@c c `i  1 p 2 8 ]
+"42
+} 0
+"62 C:\Program Files (x86)\Microchip\xc8\v1.36\sources\common\float.c
+[v ___ftpack __ftpack `(f  1 e 3 0 ]
+{
+[v ___ftpack@arg arg `um  1 p 3 0 ]
+[v ___ftpack@exp exp `uc  1 p 1 3 ]
+[v ___ftpack@sign sign `uc  1 p 1 4 ]
+"86
+} 0
+"35 C:\Users\NUC\MPLABXProjects\pic16f877a_object_avoider.X\main.c
+[v _back_off back_off `(v  1 e 1 0 ]
+{
+"42
+} 0
